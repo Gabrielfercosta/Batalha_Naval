@@ -3,14 +3,17 @@ package com.batalha.Batalha_Naval.dominio;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 public class Tabuleiro {
 
-    public static final int TAMANHO = 8;
-
+    public static final int TAMANHO = 10;
     private final List<Navio> navios = new ArrayList<>();
+    private final Set<Coordenada> tirosRecebidos = new HashSet<>();
+
 
     public void posicionarNavio(Navio navio) {
         for (Coordenada pos : navio.getPosicoes()) {
@@ -31,6 +34,11 @@ public class Tabuleiro {
     }
 
     public ResultadoTiro receberTiro(Coordenada tiro) {
+        if (tirosRecebidos.contains(tiro)) {
+            throw new IllegalArgumentException("Esta posição já foi atacada.");
+        }
+        tirosRecebidos.add(tiro);
+
         for (Navio navio : navios) {
             if (navio.ocupaPosicao(tiro)) {
                 navio.registrarTiro(tiro);
@@ -42,6 +50,7 @@ public class Tabuleiro {
         }
         return ResultadoTiro.AGUA;
     }
+
 
     public boolean todosAfundados() {
         for (Navio navio : navios) {

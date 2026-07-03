@@ -1,41 +1,38 @@
 package com.batalha.Batalha_Naval.controller;
 
 import com.batalha.Batalha_Naval.dominio.Partida;
-import com.batalha.Batalha_Naval.dto.CriarPartidaRequest;
-import com.batalha.Batalha_Naval.dto.EntrarPartidaRequest;
-import com.batalha.Batalha_Naval.dto.PartidaResponse;
-import com.batalha.Batalha_Naval.dto.PosicionarNavioRequest;
+import com.batalha.Batalha_Naval.dominio.StatusPartida;
+import com.batalha.Batalha_Naval.dto.*;
 import com.batalha.Batalha_Naval.service.GameService;
+import lombok.AllArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/game")
-@CrossOrigin(origins = "*")
+@AllArgsConstructor
 public class GameController {
 
     private final GameService gameService;
-
-    public GameController(GameService gameService) {
-        this.gameService = gameService;
-    }
+    private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/create")
     public PartidaResponse criar(@RequestBody CriarPartidaRequest request) {
-        String gameId = gameService.criarPartida(request.getJogador());
+        String gameId = gameService.criarPartida(request.getJogador(), request.getNome(), request.getSenha());
         Partida partida = gameService.buscarPartida(gameId);
         return new PartidaResponse(gameId, partida);
     }
 
     @PostMapping("/{gameId}/join")
     public PartidaResponse entrar(@PathVariable String gameId, @RequestBody EntrarPartidaRequest request) {
-        Partida partida = gameService.entrarNaPartida(gameId, request.getJogador());
+        Partida partida = gameService.entrarNaPartida(gameId, request.getJogador(), request.getSenha());
         return new PartidaResponse(gameId, partida);
     }
 
     @GetMapping("/open")
-    public List<String> listarAbertas() {
+    public List<SalaResponse> listarAbertas() {
         return gameService.listarPartidasAbertas();
     }
 
@@ -56,6 +53,23 @@ public class GameController {
                 request.getDirecao()
         );
         Partida partida = gameService.buscarPartida(gameId);
+        return new PartidaResponse(gameId, partida);
+    }
+
+    @PostMapping("/{gameId}/pronto")
+    public PartidaResponse pronto(@PathVariable String gameId, @RequestBody EntrarPartidaRequest request) {
+        Partida partida = gameService.marcarPronto(gameId, request.getJogador());
+
+        if (partida.getStatus() == StatusPartida.EM_ANDAMENTO) {
+            TiroResponse inicio = new TiroResponse(
+                    null, -1, -1, null,
+                    partida.getTurnoAtual(),
+                    partida.getStatus(),
+                    partida.getVencedor()
+            );
+            messagingTemplate.convertAndSend("/topic/game/" + gameId, inicio);
+        }
+
         return new PartidaResponse(gameId, partida);
     }
 

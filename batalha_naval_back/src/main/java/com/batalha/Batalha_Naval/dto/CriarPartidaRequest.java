@@ -7,4 +7,6 @@ import lombok.Setter;
 @Setter
 public class CriarPartidaRequest {
     private String jogador;
+    private String nome;
+    private String senha;
 }
