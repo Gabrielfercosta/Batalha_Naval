@@ -80,4 +80,8 @@ public class GameController {
         return new PartidaResponse(gameId, partida);
     }
 
+    @PostMapping("/{gameId}/sair")
+    public void sair(@PathVariable String gameId, @RequestBody EntrarPartidaRequest request) {
+        gameService.sairDaPartida(gameId, request.getJogador());
+    }
 }

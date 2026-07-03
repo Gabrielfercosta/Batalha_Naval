@@ -19,7 +19,7 @@ const SPRITES = {
 const CELULA = 28;
 const GRID = 16;
 
-function PosicionarNaviosMinado({ jogador, gameId, aoTerminar }) {
+function PosicionarNaviosMinado({ jogador, gameId, aoTerminar, aoVoltar }) {
     const [indice, setIndice] = useState(0);
     const [direcao, setDirecao] = useState('HORIZONTAL');
     const [naviosColocados, setNaviosColocados] = useState([]);
@@ -87,6 +87,7 @@ function PosicionarNaviosMinado({ jogador, gameId, aoTerminar }) {
     return (
         <div className="painel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, maxWidth: 500 }}>
             <h2>Posicione seus navios</h2>
+            <button onClick={aoVoltar} style={{ alignSelf: 'flex-start' }}>⬅ Voltar</button>
             <p style={{ fontSize: 18 }}>Navio de tamanho <b>{navioAtual.tamanho}</b> ({indice + 1} de {FROTA.length})</p>
             <button onClick={() => setDirecao(direcao === 'HORIZONTAL' ? 'VERTICAL' : 'HORIZONTAL')}>Direção: {direcao}</button>
             {mensagem && <p style={{ color: 'var(--perigo)' }}>{mensagem}</p>}

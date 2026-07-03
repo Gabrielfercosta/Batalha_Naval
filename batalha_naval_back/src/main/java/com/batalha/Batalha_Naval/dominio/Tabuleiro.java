@@ -51,8 +51,15 @@ public class Tabuleiro {
         return ResultadoTiro.AGUA;
     }
 
+    public void limpar() {
+        navios.clear();
+        tirosRecebidos.clear();
+    }
 
     public boolean todosAfundados() {
+        if (navios.isEmpty()) {
+            return false;
+        }
         for (Navio navio : navios) {
             if (!navio.estaAfundado()) {
                 return false;

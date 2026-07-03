@@ -133,6 +133,8 @@ input:focus {
 
 .celula {
   box-sizing: border-box;
+  width: 40px;
+  height: 40px;
   border: 1px solid rgba(255, 255, 255, 0.25);
   position: relative;
   background: transparent;
@@ -141,6 +143,7 @@ input:focus {
   padding: 0;
   vertical-align: middle;
 }
+
 
 .celula-min {
   width: 28px;
@@ -229,3 +232,101 @@ input:focus {
   flex-wrap: wrap;
   justify-content: center;
 }
+
+.loading-tela {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: #1f79c0;
+}
+
+.loading-gif {
+  max-width: 100%;
+  max-height: 65%;
+}
+
+.loading-barra {
+  width: 260px;
+  height: 22px;
+  padding: 3px;
+  box-sizing: border-box;
+  border: 3px solid #ffffff;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.loading-preenchimento {
+  width: 0;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 3px;
+  animation: preencher 3s linear forwards;
+}
+
+@keyframes preencher {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+.loading-texto {
+  margin: 0;
+  color: #ffffff;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+}
+
+.boasvindas {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background-image: url('/banner.png');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 7vh;
+}
+
+.botoes-entrada {
+  display: flex;
+  gap: 36px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-entrada {
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: 30px;
+  color: #ffffff;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.35);
+  padding: 20px 56px;
+  margin: 0;
+  border: 3px solid #12557f;
+  border-radius: 18px;
+  background: linear-gradient(to bottom, #6fcdf2 0%, #29abe2 48%, #1c7cbd 100%);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.55), 0 5px 0 #12557f, 0 8px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: all 0.08s ease;
+}
+
+.btn-entrada:hover {
+  filter: brightness(1.07);
+}
+
+.btn-entrada:active {
+  transform: translateY(3px);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.55), 0 2px 0 #12557f, 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+

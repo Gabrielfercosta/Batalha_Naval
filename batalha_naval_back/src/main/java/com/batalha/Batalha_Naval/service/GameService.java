@@ -74,4 +74,13 @@ public class GameService {
         partida.iniciarBatalha();
     }
 
+    public void sairDaPartida(String gameId, String jogador) {
+        Partida partida = partidas.get(gameId);
+        if (partida == null) return;
+        if (jogador.equals(partida.getJogador1())) {
+            partidas.remove(gameId);
+        } else if (jogador.equals(partida.getJogador2())) {
+            partida.removerJogador2();
+        }
+    }
 }

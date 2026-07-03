@@ -11,7 +11,6 @@ public class PartidaMinada {
 
     public static final int[] TAMANHOS_NAVIOS = {5, 4, 3, 3, 2};
     public static final int QTD_MINAS = 20;
-    public static final int TIROS_POR_TURNO = 3;
 
     private final String jogador1;
     private String jogador2;
@@ -24,7 +23,6 @@ public class PartidaMinada {
     private String turnoAtual;
     private StatusPartidaMinada status;
     private String vencedor;
-    private int tirosRestantes;
 
     private final Set<String> prontos = new HashSet<>();
     private final Set<String> jaAtirou = new HashSet<>();
@@ -42,6 +40,9 @@ public class PartidaMinada {
     public void entrar(String jogador2, String senha) {
         if (status != StatusPartidaMinada.AGUARDANDO) {
             throw new IllegalStateException("A partida não está aguardando jogador.");
+        }
+        if (jogador2.equals(this.jogador1)) {
+            throw new IllegalStateException("Você não pode entrar na sua própria sala.");
         }
         if (this.senha != null && !this.senha.isBlank() && !this.senha.equals(senha)) {
             throw new IllegalArgumentException("Senha da sala incorreta.");
@@ -78,7 +79,17 @@ public class PartidaMinada {
         prontos.add(jogador);
         if (jogador2 != null && prontos.contains(jogador1) && prontos.contains(jogador2)) {
             status = StatusPartidaMinada.EM_ANDAMENTO;
-            tirosRestantes = TIROS_POR_TURNO;
+        }
+    }
+
+    public void removerJogador2() {
+        this.jogador2 = null;
+        this.prontos.clear();
+        this.jaAtirou.clear();
+        this.tabuleiro2.limpar();
+        if (this.status == StatusPartidaMinada.POSICIONANDO) {
+            this.status = StatusPartidaMinada.AGUARDANDO;
+            this.turnoAtual = this.jogador1;
         }
     }
 
@@ -104,7 +115,6 @@ public class PartidaMinada {
 
         return resultado;
     }
-
 
     private TabuleiroMinado tabuleiroDoJogador(String jogador) {
         return jogador.equals(jogador1) ? tabuleiro1 : tabuleiro2;

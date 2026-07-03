@@ -36,6 +36,16 @@ public class MinadoService {
         return partida;
     }
 
+    public void sairDaPartida(String gameId, String jogador) {
+        PartidaMinada partida = partidas.get(gameId);
+        if (partida == null) return;
+        if (jogador.equals(partida.getJogador1())) {
+            partidas.remove(gameId);
+        } else if (jogador.equals(partida.getJogador2())) {
+            partida.removerJogador2();
+        }
+    }
+
     public List<SalaResponse> listarPartidasAbertas() {
         List<SalaResponse> abertas = new ArrayList<>();
         for (String id : partidas.keySet()) {

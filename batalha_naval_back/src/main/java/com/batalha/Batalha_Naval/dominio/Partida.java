@@ -32,13 +32,15 @@ public class Partida {
         if (status != StatusPartida.AGUARDANDO) {
             throw new IllegalStateException("A partida não está aguardando jogador.");
         }
+        if (jogador2.equals(this.jogador1)) {
+            throw new IllegalStateException("Você não pode entrar na sua própria sala.");
+        }
         if (this.senha != null && !this.senha.isBlank() && !this.senha.equals(senha)) {
             throw new IllegalArgumentException("Senha da sala incorreta.");
         }
         this.jogador2 = jogador2;
         this.status = StatusPartida.POSICIONANDO;
     }
-
 
     public void iniciarBatalha() {
         if (status != StatusPartida.POSICIONANDO) {
@@ -54,6 +56,16 @@ public class Partida {
         prontos.add(jogador);
         if (jogador2 != null && prontos.contains(jogador1) && prontos.contains(jogador2)) {
             status = StatusPartida.EM_ANDAMENTO;
+        }
+    }
+
+    public void removerJogador2() {
+        this.jogador2 = null;
+        this.prontos.clear();
+        this.tabuleiro2.limpar();
+        if (this.status == StatusPartida.POSICIONANDO) {
+            this.status = StatusPartida.AGUARDANDO;
+            this.turnoAtual = this.jogador1;
         }
     }
 

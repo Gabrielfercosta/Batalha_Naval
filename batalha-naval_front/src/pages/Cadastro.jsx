@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { registrar } from '../api/api';
 
-function Cadastro({ aoCadastrar, irParaLogin }) {
+function Cadastro({ irParaLogin }) {
     const [username, setUsername] = useState('');
     const [senha, setSenha] = useState('');
     const [erro, setErro] = useState('');
@@ -10,7 +10,7 @@ function Cadastro({ aoCadastrar, irParaLogin }) {
     async function cadastrar() {
         try {
             await registrar(username, senha);
-            setSucesso('Cadastro feito! Agora faça login.');
+            setSucesso('Pinguim criado! Agora faça login.');
             setErro('');
         } catch (e) {
             setErro(e.message);
@@ -19,31 +19,16 @@ function Cadastro({ aoCadastrar, irParaLogin }) {
     }
 
     return (
-        <div>
-            <h2>Cadastro</h2>
-            <div>
-                <input
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Usuário"
-                />
-            </div>
-            <div>
-                <input
-                    type="password"
-                    value={senha}
-                    onChange={(e) => setSenha(e.target.value)}
-                    placeholder="Senha"
-                />
-            </div>
+        <div className="painel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, maxWidth: 340 }}>
+            <h2>Criar Pinguim</h2>
+            <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Usuário" />
+            <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Senha" />
             <button onClick={cadastrar}>Cadastrar</button>
-
-            {erro && <p style={{ color: 'red' }}>{erro}</p>}
-            {sucesso && <p style={{ color: 'green' }}>{sucesso}</p>}
-
-            <p>
+            {erro && <p style={{ color: 'var(--perigo)', margin: 0 }}>{erro}</p>}
+            {sucesso && <p style={{ color: 'var(--sucesso)', margin: 0 }}>{sucesso}</p>}
+            <p style={{ fontSize: 14, margin: 0 }}>
                 Já tem conta?{' '}
-                <button onClick={irParaLogin}>Fazer login</button>
+                <button onClick={irParaLogin} style={{ padding: '6px 14px', fontSize: 14 }}>Fazer login</button>
             </p>
         </div>
     );

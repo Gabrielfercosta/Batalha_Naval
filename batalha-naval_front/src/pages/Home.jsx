@@ -1,22 +1,10 @@
-import { useState } from 'react';
-
-function Home({ aoEntrar }) {
-    const [nome, setNome] = useState('');
-
-    function entrar() {
-        if (nome.trim() === '') return;
-        aoEntrar(nome.trim());
-    }
-
+function Home({ irParaLogin, irParaCadastro }) {
     return (
-        <div>
-            <h2>Quem é você?</h2>
-            <input
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                placeholder="Digite seu nome"
-            />
-            <button onClick={entrar}>Entrar</button>
+        <div className="boasvindas">
+            <div className="botoes-entrada">
+                <button className="btn-entrada" onClick={irParaCadastro}>Registrar-se</button>
+                <button className="btn-entrada" onClick={irParaLogin}>Login</button>
+            </div>
         </div>
     );
 }

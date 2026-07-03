@@ -9,7 +9,6 @@ public class PartidaMinadaResponse {
     private final String jogador2;
     private final StatusPartidaMinada status;
     private final String turnoAtual;
-    private final int tirosRestantes;
 
     public PartidaMinadaResponse(String gameId, PartidaMinada partida) {
         this.gameId = gameId;
@@ -17,6 +16,5 @@ public class PartidaMinadaResponse {
         this.jogador2 = partida.getJogador2();
         this.status = partida.getStatus();
         this.turnoAtual = partida.getTurnoAtual();
-        this.tirosRestantes = partida.getTirosRestantes();
     }
 }

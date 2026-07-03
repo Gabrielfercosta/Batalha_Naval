@@ -100,6 +100,22 @@ export async function buscarPartida(gameId) {
     return res.json();
 }
 
+export async function sairDaPartida(gameId, jogador) {
+    await fetch(`${BASE}/${gameId}/sair`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ jogador })
+    });
+}
+
+export async function sairDaPartidaMinada(gameId, jogador) {
+    await fetch(`${MINADO_BASE}/${gameId}/sair`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ jogador })
+    });
+}
+
 export async function criarPartidaMinada(jogador, nome, senha) {
     const res = await fetch(`${MINADO_BASE}/create`, {
         method: 'POST',

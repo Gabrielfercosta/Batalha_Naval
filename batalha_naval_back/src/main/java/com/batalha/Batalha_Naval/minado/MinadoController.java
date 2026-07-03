@@ -2,7 +2,6 @@ package com.batalha.Batalha_Naval.minado;
 
 import com.batalha.Batalha_Naval.dominio.Direcao;
 import com.batalha.Batalha_Naval.dto.SalaResponse;
-import com.batalha.Batalha_Naval.minado.PartidaMinadaResponse;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +42,11 @@ public class MinadoController {
         return new PartidaMinadaResponse(gameId, minadoService.buscarPartida(gameId));
     }
 
+    @PostMapping("/{gameId}/sair")
+    public void sair(@PathVariable String gameId, @RequestBody java.util.Map<String, String> body) {
+        minadoService.sairDaPartida(gameId, body.get("jogador"));
+    }
+
     @PostMapping("/{gameId}/navio")
     public PartidaMinadaResponse posicionarNavio(@PathVariable String gameId, @RequestBody Map<String, Object> body) {
         minadoService.posicionarNavio(gameId,
@@ -67,10 +71,10 @@ public class MinadoController {
     public PartidaMinadaResponse pronto(@PathVariable String gameId, @RequestBody Map<String, String> body) {
         PartidaMinada p = minadoService.marcarPronto(gameId, body.get("jogador"));
         if (p.getStatus() == StatusPartidaMinada.EM_ANDAMENTO) {
-            com.batalha.Batalha_Naval.minado.dto.TiroMinadoResponse inicio = new com.batalha.Batalha_Naval.minado.dto.TiroMinadoResponse(
+            TiroMinadoResponse inicio = new TiroMinadoResponse(
                     null, -1, -1, null,
                     p.getTurnoAtual(), p.getStatus(), p.getVencedor(),
-                    p.getTirosRestantes(), null);
+                    null);
             messagingTemplate.convertAndSend("/topic/minado/" + gameId, inicio);
         }
         return new PartidaMinadaResponse(gameId, p);

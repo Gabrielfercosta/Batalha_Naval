@@ -22,7 +22,6 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
     const [turno, setTurno] = useState('');
     const [status, setStatus] = useState('EM_ANDAMENTO');
     const [vencedor, setVencedor] = useState(null);
-    const [tirosRestantes, setTirosRestantes] = useState(10);
     const [mensagem, setMensagem] = useState('');
 
     useEffect(() => {
@@ -58,7 +57,6 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
                 setTurno(tiro.turnoAtual);
                 setStatus(tiro.status);
                 setVencedor(tiro.vencedor);
-                setTirosRestantes(tiro.tirosRestantes);
                 setMensagem('');
             },
             (erro) => setMensagem(erro.mensagem)
@@ -71,7 +69,6 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
         buscarPartidaMinada(gameId).then((p) => {
             setTurno(p.turnoAtual);
             setStatus(p.status);
-            setTirosRestantes(p.tirosRestantes);
         });
     }, [gameId]);
 

@@ -19,7 +19,7 @@ const SPRITES = {
 
 const CELULA = 40;
 
-function Posicionar({ jogador, gameId, aoComecarBatalha }) {
+function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
     const [indice, setIndice] = useState(0);
     const [direcao, setDirecao] = useState('HORIZONTAL');
     const [ocupadas, setOcupadas] = useState([]);
@@ -123,7 +123,7 @@ function Posicionar({ jogador, gameId, aoComecarBatalha }) {
             maxWidth: 420
         }}>
             <h2>Posicione sua frota</h2>
-
+            <button onClick={aoVoltar} style={{ alignSelf: 'flex-start' }}>⬅ Voltar</button>
             {!acabou && (
                 <p style={{ fontSize: 18 }}>
                     Colocando: <b>{navioAtual.tipo}</b> (tamanho {navioAtual.tamanho})

@@ -12,7 +12,7 @@ const SPRITES = {
     2: '/navios/destroyer.png'
 };
 
-function PosicionarMinasMinado({ jogador, gameId, naviosColocados, ocupadas, aoComecar }) {
+function PosicionarMinasMinado({ jogador, gameId, naviosColocados, ocupadas, aoComecar, aoVoltar }) {
     const [minasColocadas, setMinasColocadas] = useState([]);
     const [mensagem, setMensagem] = useState('');
 
@@ -59,6 +59,7 @@ function PosicionarMinasMinado({ jogador, gameId, naviosColocados, ocupadas, aoC
     return (
         <div className="painel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, maxWidth: 500 }}>
             <h2>Posicione suas minas</h2>
+            <button onClick={aoVoltar} style={{ alignSelf: 'flex-start' }}>⬅ Voltar</button>
             <p style={{ fontSize: 18 }}>Faltam: <b>{faltam}</b> 💣 (clique na água)</p>
             {mensagem && <p style={{ color: 'var(--perigo)' }}>{mensagem}</p>}
             <div style={{ position: 'relative', display: 'inline-block' }}>

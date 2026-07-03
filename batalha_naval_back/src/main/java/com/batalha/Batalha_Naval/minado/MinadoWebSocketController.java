@@ -1,8 +1,6 @@
 package com.batalha.Batalha_Naval.minado;
 
 import com.batalha.Batalha_Naval.dto.ErroResponse;
-import com.batalha.Batalha_Naval.minado.CasaRevelada;
-import com.batalha.Batalha_Naval.minado.dto.TiroMinadoResponse;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -57,7 +55,7 @@ public class MinadoWebSocketController {
             TiroMinadoResponse response = new TiroMinadoResponse(
                     jogador, linha, coluna, resultado,
                     partida.getTurnoAtual(), partida.getStatus(), partida.getVencedor(),
-                    partida.getTirosRestantes(), novas);
+                    novas);
 
             messagingTemplate.convertAndSend("/topic/minado/" + gameId, response);
 

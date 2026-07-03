@@ -120,6 +120,15 @@ public class TabuleiroMinado {
         }
     }
 
+    public void limpar() {
+        for (int l = 0; l < TAMANHO; l++) {
+            for (int c = 0; c < TAMANHO; c++) {
+                grade[l][c] = EstadoCasa.AGUA;
+                revelada[l][c] = false;
+            }
+        }
+    }
+
     private void abrirCascataForcada(int linha, int coluna) {
         if (!dentro(linha, coluna)) return;
         if (revelada[linha][coluna]) return;

@@ -1,8 +1,5 @@
-package com.batalha.Batalha_Naval.minado.dto;
+package com.batalha.Batalha_Naval.minado;
 
-import com.batalha.Batalha_Naval.minado.CasaRevelada;
-import com.batalha.Batalha_Naval.minado.ResultadoTiroMinado;
-import com.batalha.Batalha_Naval.minado.StatusPartidaMinada;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -18,6 +15,5 @@ public class TiroMinadoResponse {
     private final String turnoAtual;
     private final StatusPartidaMinada status;
     private final String vencedor;
-    private final int tirosRestantes;
     private final List<CasaRevelada> casasReveladas;
 }
