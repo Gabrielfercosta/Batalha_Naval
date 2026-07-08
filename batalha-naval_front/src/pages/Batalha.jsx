@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { conectar, atirar } from '../ws/socket';
 import { buscarPartida } from '../api/api';
+import { tocarMusica, tocarSom } from '../audio/musica';
 
 const SPRITES = {
     PORTA_AVIOES: '/navios/carrier.png',
@@ -9,7 +10,7 @@ const SPRITES = {
     SUBMARINO: '/navios/submarine.png',
     DESTROYER: '/navios/destroyer.png'
 };
-
+const ESPESSURA = 1.3;
 const CELULA = 40;
 
 function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
@@ -33,6 +34,9 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
                     } else {
                         setTirosInimigos((antigos) => ({ ...antigos, [chave]: tiro.resultado }));
                     }
+                    if (tiro.resultado === 'ACERTO' || tiro.resultado === 'AFUNDADO') {
+                        tocarSom('explosao');
+                    }
                 }
                 setTurno(tiro.turnoAtual);
                 setStatus(tiro.status);
@@ -49,6 +53,12 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
             c.deactivate();
         };
     }, [gameId, jogador]);
+
+    useEffect(() => {
+        if (status === 'FINALIZADA') {
+            tocarMusica(vencedor === jogador ? 'vitoria' : 'derrota', false);
+        }
+    }, [status, vencedor]);
 
     useEffect(() => {
         buscarPartida(gameId).then((p) => {
@@ -95,25 +105,51 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
 
     function estiloNavio(tamanho, linha, coluna, dir) {
         const horizontal = dir === 'HORIZONTAL';
-        const comprimento = tamanho * CELULA;
-        const base = { position: 'absolute', width: CELULA, height: comprimento, objectFit: 'fill', pointerEvents: 'none' };
-        if (!horizontal) return { ...base, left: coluna * CELULA, top: linha * CELULA };
-        const centroX = coluna * CELULA + comprimento / 2;
-        const centroY = linha * CELULA + CELULA / 2;
-        return { ...base, left: centroX - CELULA / 2, top: centroY - comprimento / 2, transform: 'rotate(90deg)' };
+        const base = {
+            position: 'absolute',
+            width: `calc(var(--celula) * ${ESPESSURA})`,
+            height: `calc(var(--celula) * ${tamanho})`,
+            objectFit: 'fill',
+            pointerEvents: 'none',
+            '--rot': horizontal ? '90deg' : '0deg',
+            transform: 'rotate(var(--rot))'
+        };
+        if (!horizontal) {
+            const left = coluna + 0.5 - ESPESSURA / 2;
+            return { ...base, left: `calc(var(--celula) * ${left})`, top: `calc(var(--celula) * ${linha})` };
+        }
+        const left = coluna + tamanho / 2 - ESPESSURA / 2;
+        const top = linha + 0.5 - tamanho / 2;
+        return { ...base, left: `calc(var(--celula) * ${left})`, top: `calc(var(--celula) * ${top})` };
+    }
+
+    function navioAfundado(navio) {
+        for (let i = 0; i < navio.tamanho; i++) {
+            const chave = navio.direcao === 'HORIZONTAL'
+                ? `${navio.linha}-${navio.coluna + i}`
+                : `${navio.linha + i}-${navio.coluna}`;
+            const r = tirosInimigos[chave];
+            if (r !== 'ACERTO' && r !== 'AFUNDADO') return false;
+        }
+        return true;
     }
 
     function camadaNavios() {
         return meusNavios.map((navio, i) => (
-            <img key={i} src={SPRITES[navio.tipo]} style={estiloNavio(navio.tamanho, navio.linha, navio.coluna, navio.direcao)} />
+            <img
+                key={i}
+                src={SPRITES[navio.tipo]}
+                className={navioAfundado(navio) ? 'navio-afundando' : ''}
+                style={estiloNavio(navio.tamanho, navio.linha, navio.coluna, navio.direcao)}
+            />
         ));
     }
 
     const minhaVez = turno === jogador;
 
     return (
-        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <div className="painel" style={{ textAlign: 'center', padding: '10px 24px' }}>
+        <>
+            <div className="painel painel-batalha">
                 {status === 'FINALIZADA' && (
                     <>
                         <h2 style={{ margin: 0 }}>{vencedor === jogador ? 'Você venceu! 🏆' : 'Você perdeu! 💀'}</h2>
@@ -129,20 +165,19 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
                 {mensagem && <p style={{ color: '#ffb4b4', margin: '8px 0 0' }}>{mensagem}</p>}
             </div>
 
-            <div className="tabuleiros">
-                <div style={{ textAlign: 'center' }}>
-                    <h4>Mar Inimigo</h4>
+            <span className="rotulo-lago rotulo-esquerdo">Mar Inimigo</span>
+            <span className="rotulo-lago rotulo-direito">Seu Mar</span>
+
+            <div className="arena">
+                <div className="lago-grid lago-esquerdo">
                     {montarTabuleiro(meusTiros, true, true)}
                 </div>
-                <div style={{ textAlign: 'center' }}>
-                    <h4>Seu Mar</h4>
-                    <div style={{ position: 'relative', display: 'inline-block' }}>
-                        {montarTabuleiro(tirosInimigos, false, false)}
-                        {camadaNavios()}
-                    </div>
+                <div className="lago-grid lago-direito">
+                    {montarTabuleiro(tirosInimigos, false, false)}
+                    {camadaNavios()}
                 </div>
             </div>
-        </div>
+        </>
     );
 }
 

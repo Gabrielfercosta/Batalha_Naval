@@ -10,6 +10,7 @@ import BatalhaMinada from './pages/BatalhaMinada';
 import Home from './pages/Home';
 import Loading from './pages/Loading';
 import { sairDaPartida, sairDaPartidaMinada } from './api/api';
+import { tocarMusica, retomar, alternarMudo, estaMudo } from './audio/musica';
 
 function App() {
     const [tela, setTela] = useState('home');
@@ -20,6 +21,8 @@ function App() {
     const [minhasMinas, setMinhasMinas] = useState([]);
     const [destinoLoading, setDestinoLoading] = useState('');
     const [modoAtual, setModoAtual] = useState('');
+    const [mudo, setMudo] = useState(estaMudo());
+    const [somAtivado, setSomAtivado] = useState(false);
 
     useEffect(() => {
         const tokenSalvo = localStorage.getItem('token');
@@ -39,14 +42,39 @@ function App() {
         }
     }, []);
 
+    useEffect(() => {
+        if (tela === 'posicionar' || tela === 'posicionarNaviosMinado' || tela === 'posicionarMinasMinado') {
+            tocarMusica('posicionamento');
+        } else if (tela === 'batalha' || tela === 'batalhaMinada') {
+            tocarMusica('batalha');
+        } else if (tela === 'login' || tela === 'cadastro' || tela === 'home' || tela === 'lobby') {
+            tocarMusica('inicial');
+        }
+    }, [tela]);
+
+    useEffect(() => {
+        function ativarSom() {
+            retomar();
+            setSomAtivado(true);
+        }
+        window.addEventListener('pointerdown', ativarSom);
+        return () => window.removeEventListener('pointerdown', ativarSom);
+    }, []);
+
     function aoLogar(nome) { setJogador(nome); setTela('lobby'); }
 
     function sair() {
+        if (gameId) {
+            if (modoAtual === 'minada') sairDaPartidaMinada(gameId, jogador).catch(() => {});
+            else sairDaPartida(gameId, jogador).catch(() => {});
+        }
         localStorage.removeItem('token');
         localStorage.removeItem('jogador');
         localStorage.removeItem('gameId');
         localStorage.removeItem('modo');
         setJogador('');
+        setGameId('');
+        setModoAtual('');
         setTela('login');
     }
 
@@ -75,11 +103,18 @@ function App() {
 
     return (
         <div className="container">
-            {tela !== 'batalha' && tela !== 'batalhaMinada' && tela !== 'loading' && tela !== 'home' && <h1>Batalha Naval</h1>}
+            {!somAtivado && (
+                <div className="dica-som">🔊 Clique para ativar o som</div>
+            )}
+            <button className="btn-mudo" onClick={() => setMudo(alternarMudo())}>
+                {mudo ? '🔇' : '🔊'}
+            </button>
+            {tela !== 'batalha' && tela !== 'batalhaMinada' && tela !== 'loading' && tela !== 'home' && <img src="/titulo.png" alt="Batalha Naval" className="titulo-logo" />
+            }
 
             {jogador && (
                 <div style={{ position: 'fixed', top: 12, right: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, zIndex: 100 }}>
-                    <span>👤 {jogador}</span>
+                    <span style={{ background: 'rgba(15, 44, 74, 0.65)', color: '#fff', fontWeight: 700, padding: '6px 12px', borderRadius: 999 }}> {jogador}</span>
                     <button onClick={sair} style={{ padding: '6px 14px', fontSize: 14 }}>Sair</button>
                 </div>
             )}

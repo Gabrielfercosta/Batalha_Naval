@@ -114,16 +114,11 @@ input:focus {
   box-shadow: 0 8px 0 rgba(15, 76, 117, 0.35), 0 14px 26px rgba(0, 0, 0, 0.35);
 }
 
-.tabuleiro {
-  border-collapse: collapse;
-  background-image: url('/agua.png');
-  background-repeat: repeat;
-  background-size: auto 60px;
-  animation: agua-flui 100s linear infinite;
-  border: 5px solid #ffffff;
-  outline: 3px solid var(--azul-medio);
-  border-radius: 14px;
-  overflow: hidden;
+.tabuleiros {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 @keyframes agua-flui {
@@ -168,31 +163,6 @@ input:focus {
   0%   { transform: scale(0.5); opacity: 0.4; }
   50%  { transform: scale(1.2); }
   100% { transform: scale(1); opacity: 1; }
-}
-
-.fogo {
-  background: #6e1a1a;
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);
-  position: relative;
-}
-
-.fogo::after {
-  content: "";
-  position: absolute;
-  width: 128px;
-  height: 128px;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%) scale(1);
-  background-image: url('/explosao.png');
-  background-repeat: no-repeat;
-  animation-name: explodir, sumir;
-  animation-duration: 0.6s, 0.15s;
-  animation-timing-function: steps(6), ease-in;
-  animation-delay: 0s, 0.6s;
-  animation-fill-mode: forwards, forwards;
-  pointer-events: none;
-  z-index: 5;
 }
 
 @keyframes explodir {
@@ -283,6 +253,31 @@ input:focus {
   letter-spacing: 0.5px;
 }
 
+.btn-mudo {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 600;
+  font-size: 18px;
+  padding: 6px 12px;
+  min-width: 44px;
+}
+
+.dica-som {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 600;
+  background: rgba(15, 44, 74, 0.65);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  animation: piscar 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
 .boasvindas {
   position: fixed;
   inset: 0;
@@ -329,4 +324,302 @@ input:focus {
   box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.55), 0 2px 0 #12557f, 0 3px 6px rgba(0, 0, 0, 0.3);
 }
 
+.arena {
+  --w: 583;
+  --h: 279;
+  --celula: 2.3cqw;
+  container-type: size;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: max(100vw, calc(100vh * var(--w) / var(--h)));
+  aspect-ratio: var(--w) / var(--h);
+  background-image: url('/arena.png');
+  background-size: 100% 100%;
+  background-position: center;
+  z-index: 1;
+}
 
+.arena .tabuleiro {
+  background: rgba(12, 44, 74, 0.18);
+  border: none;
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: -2px;
+  border-radius: 12px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.arena .celula {
+  box-sizing: border-box;
+  width: var(--celula);
+  height: var(--celula);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+.painel-batalha {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 120;
+  text-align: center;
+  padding: 10px 24px;
+}
+
+.lago-grid {
+  position: absolute;
+  top: 54%;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+}
+
+.rotulo-lago {
+  position: fixed;
+  top: 27px;
+  transform: translateX(-50%);
+  z-index: 110;
+  color: #ffffff;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: 22px;
+  padding: 6px 18px;
+  background: rgba(15, 44, 74, 0.65);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.6);
+}
+
+.rotulo-esquerdo { left: 27%; }
+.rotulo-direito  { left: 72%; }
+
+.lago-esquerdo { left: 28%; }
+.lago-direito  { left: 73%; }
+
+.pos-layout {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pos-board .tabuleiro {
+  border: none;
+  outline: 4px solid var(--azul-ceu);
+  outline-offset: -4px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: rgba(41, 171, 226, 0.18);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.vitrine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 140px;
+}
+
+.vitrine-img {
+  height: 500px;
+  width: auto;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+}
+
+.vitrine-nome {
+  margin: 0;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--azul-fundo);
+}
+
+.vitrine-tamanho {
+  margin: 0;
+  font-size: 14px;
+  color: var(--texto);
+}
+
+.pos-board .celula {
+  border: 1px solid rgba(27, 111, 168, 0.45);
+}
+
+.arena-min {
+  --w: 2912;
+  --h: 1440;
+  --celula: 2.0cqw;
+  background-image: url('/arenaMinada.png');
+}
+
+.arena-min .celula {
+  font-size: calc(var(--celula) * 0.55);
+}
+
+.arena-min .lago-esquerdo { left: 27%; }
+.arena-min .lago-direito  { left: 72%; }
+.arena-min .lago-grid { top: 48%; }
+
+@keyframes afundar {
+  0%   { transform: translateY(0) rotate(var(--rot)); opacity: 1; filter: brightness(1); }
+  100% { transform: translateY(calc(var(--celula) * 1.6)) rotate(calc(var(--rot) + 20deg)); opacity: 0; filter: brightness(0.3); }
+}
+
+.navio-afundando {
+  animation: afundar 1.5s ease-in forwards;
+}
+
+.fogo {
+    position: relative;
+    background: rgba(120, 30, 20, 0.5);
+}
+
+.celula.fogo {
+    overflow: visible;
+}
+
+.fogo::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(var(--celula) * 2.2);
+    height: calc(var(--celula) * 2.2);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    animation: explodir-flip 0.6s forwards;
+    z-index: 5;
+    pointer-events: none;
+}
+
+@keyframes explodir-flip {
+    0%,   16% { background-image: url('/explosao/explosao1.png'); opacity: 1; }
+    17%,  33% { background-image: url('/explosao/explosao2.png'); }
+    34%,  49% { background-image: url('/explosao/explosao3.png'); }
+    50%,  66% { background-image: url('/explosao/explosao4.png'); }
+    67%,  83% { background-image: url('/explosao/explosao5.png'); }
+    84%       { background-image: url('/explosao/explosao6.png'); opacity: 1; }
+    100%      { background-image: url('/explosao/explosao6.png'); opacity: 0; }
+}
+
+@keyframes sumir {
+  to { opacity: 0; }
+}
+
+.titulo-logo {
+  width: 13vw;
+  height: auto;
+  margin: 4px 0 10px;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes piscar {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+.btn-ajuda {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  font-size: 16px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal {
+  position: relative;
+  background: linear-gradient(to bottom, #ffffff 0%, var(--gelo) 100%);
+  border: 5px solid #ffffff;
+  outline: 4px solid var(--azul-ceu);
+  border-radius: 26px;
+  padding: 30px 26px 26px;
+  max-width: 460px;
+  width: 100%;
+  color: var(--texto);
+  box-shadow: 0 10px 0 rgba(15, 76, 117, 0.35), 0 16px 30px rgba(0, 0, 0, 0.4);
+}
+
+.modal-fechar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 15px;
+}
+
+.modal-lista {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.modal-lista li {
+  margin-bottom: 8px;
+}
+
+.badge-ajuda {
+  position: absolute;
+  top: 2px;
+  right: 8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--azul-medio);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.contagem-regressiva {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 44, 74, 0.45);
+  pointer-events: none;
+}
+
+.contagem-numero {
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: 32vh;
+  color: #ffffff;
+  text-shadow: 0 6px 0 var(--azul-fundo), 0 14px 26px rgba(0, 0, 0, 0.5);
+  animation: pop-contagem 1s ease-out;
+}
+
+@keyframes pop-contagem {
+  0%   { transform: scale(0.3); opacity: 0; }
+  35%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.9; }
+}

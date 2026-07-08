@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { conectarMinado, atirarMinado } from '../ws/socket';
 import { buscarPartidaMinada } from '../api/api';
+import { tocarMusica, tocarSom } from '../audio/musica';
 
-const CELULA = 28;
+
 const GRID = 16;
+const ESPESSURA = 1.3;
 
 const SPRITES = {
     5: '/navios/carrier.png',
@@ -20,9 +22,12 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
     const [pistasMeuMar, setPistasMeuMar] = useState({});
     const [bandeiras, setBandeiras] = useState({});
     const [turno, setTurno] = useState('');
-    const [status, setStatus] = useState('EM_ANDAMENTO');
+    const [status, setStatus] = useState('');
     const [vencedor, setVencedor] = useState(null);
     const [mensagem, setMensagem] = useState('');
+    const [contagem, setContagem] = useState(null);
+    const jaContou = useRef(false);
+    const [liberado, setLiberado] = useState(false);
 
     useEffect(() => {
         const c = conectarMinado(gameId, jogador,
@@ -33,6 +38,9 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
                         setMeusTiros((a) => ({ ...a, [chave]: tiro.resultado }));
                     } else {
                         setTirosInimigos((a) => ({ ...a, [chave]: tiro.resultado }));
+                    }
+                    if (tiro.resultado === 'MINA') {
+                        tocarSom('explosao');
                     }
                     if (tiro.casasReveladas) {
                         if (tiro.autor === jogador) {
@@ -59,11 +67,34 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
                 setVencedor(tiro.vencedor);
                 setMensagem('');
             },
-            (erro) => setMensagem(erro.mensagem)
+            (erro) => setMensagem(erro.mensagem),
+            (info) => {
+                if (!jaContou.current) {
+                    jaContou.current = true;
+                    setContagem(info.segundos);
+                }
+            }
         );
         setClient(c);
         return () => { c.deactivate(); };
     }, [gameId, jogador]);
+
+    useEffect(() => {
+        if (contagem === null) return;
+        if (contagem === 0) {
+            setContagem(null);
+            setLiberado(true);
+            return;
+        }
+        const t = setTimeout(() => setContagem(contagem - 1), 1000);
+        return () => clearTimeout(t);
+    }, [contagem]);
+
+    useEffect(() => {
+        if (status === 'FINALIZADA') {
+            tocarMusica(vencedor === jogador ? 'vitoria' : 'derrota', false);
+        }
+    }, [status, vencedor]);
 
     useEffect(() => {
         buscarPartidaMinada(gameId).then((p) => {
@@ -73,6 +104,8 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
     }, [gameId]);
 
     function clicarInimigo(linha, coluna) {
+        if (contagem !== null) return;
+        if (!liberado) return;
         if (status !== 'EM_ANDAMENTO') return;
         const chave = `${linha}-${coluna}`;
         if (meusTiros[chave] || pistas[chave]) return;
@@ -102,13 +135,30 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
     }
 
     function estiloNavio(tamanho, linha, coluna, dir) {
+        const passo = 100 / GRID;
         const horizontal = dir === 'HORIZONTAL';
-        const comprimento = tamanho * CELULA;
-        const base = { position: 'absolute', width: CELULA, height: comprimento, objectFit: 'fill', pointerEvents: 'none' };
-        if (!horizontal) return { ...base, left: coluna * CELULA, top: linha * CELULA };
-        const centroX = coluna * CELULA + comprimento / 2;
-        const centroY = linha * CELULA + CELULA / 2;
-        return { ...base, left: centroX - CELULA / 2, top: centroY - comprimento / 2, transform: 'rotate(90deg)' };
+        const base = {
+            position: 'absolute',
+            width: `${passo * ESPESSURA}%`,
+            height: `${passo * tamanho}%`,
+            objectFit: 'fill',
+            pointerEvents: 'none'
+        };
+        if (!horizontal) {
+            return {
+                ...base,
+                left: `${passo * (coluna + 0.5 - ESPESSURA / 2)}%`,
+                top: `${passo * linha}%`
+            };
+        }
+        const left = coluna + tamanho / 2 - ESPESSURA / 2;
+        const top = linha + 0.5 - tamanho / 2;
+        return {
+            ...base,
+            left: `${passo * left}%`,
+            top: `${passo * top}%`,
+            transform: 'rotate(90deg)'
+        };
     }
 
     function montarTabuleiroInimigo() {
@@ -123,7 +173,7 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
                 celulas.push(
                     <td
                         key={chave}
-                        className={`celula celula-min ${status === 'EM_ANDAMENTO' ? 'clicavel' : ''}`}
+                        className={`celula ${status === 'EM_ANDAMENTO' ? 'clicavel' : ''}`}
                         onClick={() => clicarInimigo(l, c)}
                         onContextMenu={(e) => alternarBandeira(e, l, c)}
                         style={{ background: bg }}
@@ -132,7 +182,7 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
                         {resultado === 'MINA' && '💥'}
                         {!resultado && bandeiras[chave] && '🚩'}
                         {resultado !== 'NAVIO' && resultado !== 'MINA' && !bandeiras[chave] && pista && (
-                            <span style={{position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontSize: 8, lineHeight: 1}}>
+                            <span style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontSize: 'calc(var(--celula) * 0.28)', lineHeight: 1 }}>
                                 <span style={{ color: '#ff6b6b' }}>💣{pista.minas}</span>
                                 <span style={{ color: '#7CFC00' }}>🚢{pista.navios}</span>
                             </span>
@@ -146,6 +196,7 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
     }
 
     function montarMeuTabuleiro() {
+        const minasSet = new Set(minhasMinas.map((m) => `${m.linha}-${m.coluna}`));
         const linhas = [];
         for (let l = 0; l < GRID; l++) {
             const celulas = [];
@@ -153,15 +204,19 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
                 const chave = `${l}-${c}`;
                 const resultado = tirosInimigos[chave];
                 const revelada = pistasMeuMar[chave];
+                const temMina = minasSet.has(chave);
                 let bg = 'transparent';
                 if (resultado === 'NAVIO') bg = '#2e8b57';
                 else if (resultado === 'MINA') bg = '#c0392b';
                 else if (resultado === 'AGUA') bg = '#15394f';
                 else if (revelada) bg = '#15394f';
                 celulas.push(
-                    <td key={chave} className="celula celula-min" style={{ background: bg }}>
+                    <td key={chave} className="celula" style={{ background: bg }}>
                         {resultado === 'NAVIO' && '💥'}
                         {resultado === 'AGUA' && '•'}
+                        {temMina && (
+                            <img src="/bomba.png" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }} />
+                        )}
                     </td>
                 );
             }
@@ -174,17 +229,6 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
                 {meusNavios.map((n, i) => (
                     <img key={i} src={SPRITES[n.tamanho]} style={estiloNavio(n.tamanho, n.linha, n.coluna, n.direcao)} />
                 ))}
-                {minhasMinas.map((m, i) => (
-                    <img key={`mina-${i}`} src="/bomba.png" style={{
-                        position: 'absolute',
-                        left: m.coluna * CELULA,
-                        top: m.linha * CELULA,
-                        width: CELULA,
-                        height: CELULA,
-                        objectFit: 'contain',
-                        pointerEvents: 'none'
-                    }} />
-                ))}
             </div>
         );
     }
@@ -192,8 +236,13 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
     const minhaVez = turno === jogador;
 
     return (
-        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <div className="painel" style={{ textAlign: 'center', padding: '10px 24px' }}>
+        <>
+            {contagem !== null && (
+                <div className="contagem-regressiva">
+                    <span className="contagem-numero" key={contagem}>{contagem}</span>
+                </div>
+            )}
+            <div className="painel painel-batalha">
                 {status === 'FINALIZADA' && (
                     <>
                         <h2 style={{ margin: 0 }}>{vencedor === jogador ? 'Você venceu! 🏆' : 'Você perdeu! 💀'}</h2>
@@ -209,17 +258,18 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
                 {mensagem && <p style={{ color: '#ffb4b4', margin: '8px 0 0' }}>{mensagem}</p>}
             </div>
 
-            <div className="tabuleiros">
-                <div style={{ textAlign: 'center' }}>
-                    <h4>Mar Inimigo 💣</h4>
+            <span className="rotulo-lago rotulo-esquerdo">Mar Inimigo</span>
+            <span className="rotulo-lago rotulo-direito">Seu Mar</span>
+
+            <div className="arena arena-min">
+                <div className="lago-grid lago-esquerdo">
                     {montarTabuleiroInimigo()}
                 </div>
-                <div style={{ textAlign: 'center' }}>
-                    <h4>Seu Mar</h4>
+                <div className="lago-grid lago-direito">
                     {montarMeuTabuleiro()}
                 </div>
             </div>
-        </div>
+        </>
     );
 }
 

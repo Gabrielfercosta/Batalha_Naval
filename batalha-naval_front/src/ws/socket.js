@@ -26,7 +26,7 @@ export function atirar(client, gameId, jogador, linha, coluna) {
     });
 }
 
-export function conectarMinado(gameId, jogador, aoReceberTiro, aoReceberErro) {
+export function conectarMinado(gameId, jogador, aoReceberTiro, aoReceberErro, aoContagem) {
     const client = new Client({
         webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
         onConnect: () => {
@@ -35,6 +35,13 @@ export function conectarMinado(gameId, jogador, aoReceberTiro, aoReceberErro) {
             });
             client.subscribe(`/topic/minado/${gameId}/erro/${jogador}`, (msg) => {
                 aoReceberErro(JSON.parse(msg.body));
+            });
+            client.subscribe(`/topic/minado/${gameId}/contagem`, (msg) => {
+                aoContagem(JSON.parse(msg.body));
+            });
+            client.publish({
+                destination: `/app/minado/${gameId}/cheguei`,
+                body: JSON.stringify({ jogador })
             });
         }
     });
