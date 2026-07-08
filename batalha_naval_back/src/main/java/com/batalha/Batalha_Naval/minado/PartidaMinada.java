@@ -11,21 +11,20 @@ public class PartidaMinada {
 
     public static final int[] TAMANHOS_NAVIOS = {5, 4, 3, 3, 2};
     public static final int QTD_MINAS = 20;
-
     private final String jogador1;
     private String jogador2;
     private final String nome;
     private final String senha;
-
     private final TabuleiroMinado tabuleiro1 = new TabuleiroMinado();
     private final TabuleiroMinado tabuleiro2 = new TabuleiroMinado();
-
     private String turnoAtual;
     private StatusPartidaMinada status;
     private String vencedor;
-
     private final Set<String> prontos = new HashSet<>();
     private final Set<String> jaAtirou = new HashSet<>();
+    private final Set<String> naBatalha = new HashSet<>();
+    private boolean contagemIniciada = false;
+    private final long criadaEm = System.currentTimeMillis();
 
     public PartidaMinada(String jogador1, String nome, String senha) {
         this.jogador1 = jogador1;
@@ -51,12 +50,29 @@ public class PartidaMinada {
         this.status = StatusPartidaMinada.POSICIONANDO;
     }
 
+    public boolean registrarChegada(String jogador) {
+        naBatalha.add(jogador);
+        if (!contagemIniciada && jogador2 != null
+                && naBatalha.contains(jogador1) && naBatalha.contains(jogador2)) {
+            contagemIniciada = true;
+            return true;
+        }
+        return false;
+    }
+
     public void posicionarNavio(String jogador, int linha, int coluna, int tamanho, Direcao direcao) {
         tabuleiroDoJogador(jogador).posicionarNavio(linha, coluna, tamanho, direcao);
     }
 
     public void posicionarMina(String jogador, int linha, int coluna) {
         tabuleiroDoJogador(jogador).posicionarMina(linha, coluna);
+    }
+
+    public void abandonar(String jogador) {
+        if (status == StatusPartidaMinada.EM_ANDAMENTO) {
+            vencedor = jogador.equals(jogador1) ? jogador2 : jogador1;
+            status = StatusPartidaMinada.FINALIZADA;
+        }
     }
 
     public void marcarPronto(String jogador) {

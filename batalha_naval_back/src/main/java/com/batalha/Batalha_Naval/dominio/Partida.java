@@ -17,6 +17,7 @@ public class Partida {
     private final Set<String> prontos = new HashSet<>();
     private final String nome;
     private final String senha;
+    private final long criadaEm = System.currentTimeMillis();
 
     public Partida(String jogador1, String nome, String senha) {
         this.jogador1 = jogador1;
@@ -40,6 +41,13 @@ public class Partida {
         }
         this.jogador2 = jogador2;
         this.status = StatusPartida.POSICIONANDO;
+    }
+
+    public void abandonar(String jogador) {
+        if (status == StatusPartida.EM_ANDAMENTO) {
+            vencedor = jogador.equals(jogador1) ? jogador2 : jogador1;
+            status = StatusPartida.FINALIZADA;
+        }
     }
 
     public void iniciarBatalha() {

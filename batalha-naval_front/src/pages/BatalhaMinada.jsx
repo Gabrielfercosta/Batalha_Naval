@@ -182,9 +182,8 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
                         {resultado === 'MINA' && '💥'}
                         {!resultado && bandeiras[chave] && '🚩'}
                         {resultado !== 'NAVIO' && resultado !== 'MINA' && !bandeiras[chave] && pista && (
-                            <span style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontSize: 'calc(var(--celula) * 0.28)', lineHeight: 1 }}>
-                                <span style={{ color: '#ff6b6b' }}>💣{pista.minas}</span>
-                                <span style={{ color: '#7CFC00' }}>🚢{pista.navios}</span>
+                            <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'calc(var(--celula) * 0.42)', lineHeight: 1, color: '#ffffff', fontWeight: 800, textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>
+                                💣{pista.minas}
                             </span>
                         )}
                     </td>

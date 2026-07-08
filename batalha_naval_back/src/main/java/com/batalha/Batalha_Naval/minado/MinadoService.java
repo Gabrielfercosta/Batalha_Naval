@@ -2,6 +2,7 @@ package com.batalha.Batalha_Naval.minado;
 
 import com.batalha.Batalha_Naval.dominio.Direcao;
 import com.batalha.Batalha_Naval.dto.SalaResponse;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -36,14 +37,35 @@ public class MinadoService {
         return partida;
     }
 
-    public void sairDaPartida(String gameId, String jogador) {
+    public PartidaMinada sairDaPartida(String gameId, String jogador) {
         PartidaMinada partida = partidas.get(gameId);
-        if (partida == null) return;
+        if (partida == null) return null;
+
+        if (partida.getStatus() == StatusPartidaMinada.EM_ANDAMENTO) {
+            partida.abandonar(jogador);
+            return partida;
+        }
+
+        if (partida.getStatus() == StatusPartidaMinada.FINALIZADA) {
+            partidas.remove(gameId);
+            return null;
+        }
+
         if (jogador.equals(partida.getJogador1())) {
             partidas.remove(gameId);
         } else if (jogador.equals(partida.getJogador2())) {
             partida.removerJogador2();
         }
+        return null;
+    }
+
+    @Scheduled(fixedRate = 60000)
+    public void limparSalasAbandonadas() {
+        long agora = System.currentTimeMillis();
+        long limite = 5 * 60 * 1000;
+        partidas.entrySet().removeIf(e ->
+                e.getValue().getStatus() == StatusPartidaMinada.AGUARDANDO
+                        && agora - e.getValue().getCriadaEm() > limite);
     }
 
     public List<SalaResponse> listarPartidasAbertas() {

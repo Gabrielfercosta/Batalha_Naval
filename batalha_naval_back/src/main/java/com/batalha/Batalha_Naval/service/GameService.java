@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.scheduling.annotation.Scheduled;
 
 
 @Service
@@ -21,6 +22,15 @@ public class GameService {
             throw new IllegalArgumentException("Partida não encontrada: " + gameId);
         }
         return partida;
+    }
+
+    @Scheduled(fixedRate = 60000)
+    public void limparSalasAbandonadas() {
+        long agora = System.currentTimeMillis();
+        long limite = 5 * 60 * 1000;
+        partidas.entrySet().removeIf(e ->
+                e.getValue().getStatus() == StatusPartida.AGUARDANDO
+                        && agora - e.getValue().getCriadaEm() > limite);
     }
 
     public String criarPartida(String jogador1, String nome, String senha) {
@@ -74,13 +84,26 @@ public class GameService {
         partida.iniciarBatalha();
     }
 
-    public void sairDaPartida(String gameId, String jogador) {
+    public Partida sairDaPartida(String gameId, String jogador) {
         Partida partida = partidas.get(gameId);
-        if (partida == null) return;
+        if (partida == null) return null;
+
+        if (partida.getStatus() == StatusPartida.EM_ANDAMENTO) {
+            partida.abandonar(jogador);
+            return partida;
+        }
+
+        if (partida.getStatus() == StatusPartida.FINALIZADA) {
+            partidas.remove(gameId);
+            return null;
+        }
+
         if (jogador.equals(partida.getJogador1())) {
             partidas.remove(gameId);
         } else if (jogador.equals(partida.getJogador2())) {
             partida.removerJogador2();
         }
+        return null;
     }
+
 }

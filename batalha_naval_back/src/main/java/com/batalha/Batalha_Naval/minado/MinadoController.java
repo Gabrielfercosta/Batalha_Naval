@@ -44,7 +44,13 @@ public class MinadoController {
 
     @PostMapping("/{gameId}/sair")
     public void sair(@PathVariable String gameId, @RequestBody java.util.Map<String, String> body) {
-        minadoService.sairDaPartida(gameId, body.get("jogador"));
+        PartidaMinada partida = minadoService.sairDaPartida(gameId, body.get("jogador"));
+        if (partida != null) {
+            TiroMinadoResponse aviso = new TiroMinadoResponse(
+                    null, -1, -1, null,
+                    partida.getTurnoAtual(), partida.getStatus(), partida.getVencedor(), null);
+            messagingTemplate.convertAndSend("/topic/minado/" + gameId, aviso);
+        }
     }
 
     @PostMapping("/{gameId}/navio")

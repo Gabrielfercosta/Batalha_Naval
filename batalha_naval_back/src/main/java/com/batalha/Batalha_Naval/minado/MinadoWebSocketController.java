@@ -65,4 +65,17 @@ public class MinadoWebSocketController {
                     new ErroResponse(e.getMessage()));
         }
     }
+
+    @MessageMapping("/minado/{gameId}/cheguei")
+    public void cheguei(@DestinationVariable String gameId, Map<String, Object> body) {
+        String jogador = (String) body.get("jogador");
+        try {
+            PartidaMinada partida = minadoService.buscarPartida(gameId);
+            if (partida.registrarChegada(jogador)) {
+                messagingTemplate.convertAndSend("/topic/minado/" + gameId + "/contagem", (Object) Map.of("segundos", 5));
+            }
+        } catch (Exception e) {
+        }
+    }
+
 }

@@ -82,6 +82,15 @@ public class GameController {
 
     @PostMapping("/{gameId}/sair")
     public void sair(@PathVariable String gameId, @RequestBody EntrarPartidaRequest request) {
-        gameService.sairDaPartida(gameId, request.getJogador());
+        Partida partida = gameService.sairDaPartida(gameId, request.getJogador());
+        if (partida != null) {
+            TiroResponse aviso = new TiroResponse(
+                    null, -1, -1, null,
+                    partida.getTurnoAtual(),
+                    partida.getStatus(),
+                    partida.getVencedor()
+            );
+            messagingTemplate.convertAndSend("/topic/game/" + gameId, aviso);
+        }
     }
 }
