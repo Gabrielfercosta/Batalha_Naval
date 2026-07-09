@@ -3,6 +3,7 @@ package com.batalha.Batalha_Naval.auth;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -11,11 +12,12 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private final SecretKey chave = Keys.hmacShaKeyFor(
-            "chave-super-secreta-que-nao-vai-dar-erro-de-ser-curta-demais-pqp".getBytes()
-    );
-
+    private final SecretKey chave;
     private final long validadeMs = 1000 * 60 * 60 * 24;
+
+    public JwtService(@Value("${jwt.secret:chave-super-secreta-que-nao-vai-dar-erro-de-ser-curta-demais-pqp}") String segredo) {
+        this.chave = Keys.hmacShaKeyFor(segredo.getBytes());
+    }
 
     public String gerarToken(String username) {
         Date agora = new Date();
