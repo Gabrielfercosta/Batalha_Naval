@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { conectarMinado, atirarMinado } from '../ws/socket';
 import { buscarPartidaMinada } from '../api/api';
 import { tocarMusica, tocarSom } from '../audio/musica';
-
+import { estiloNavio as estiloNavioBase } from '../utils/navios';
 
 const GRID = 16;
 const ESPESSURA = 1.3;
@@ -135,30 +135,7 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
     }
 
     function estiloNavio(tamanho, linha, coluna, dir) {
-        const passo = 100 / GRID;
-        const horizontal = dir === 'HORIZONTAL';
-        const base = {
-            position: 'absolute',
-            width: `${passo * ESPESSURA}%`,
-            height: `${passo * tamanho}%`,
-            objectFit: 'fill',
-            pointerEvents: 'none'
-        };
-        if (!horizontal) {
-            return {
-                ...base,
-                left: `${passo * (coluna + 0.5 - ESPESSURA / 2)}%`,
-                top: `${passo * linha}%`
-            };
-        }
-        const left = coluna + tamanho / 2 - ESPESSURA / 2;
-        const top = linha + 0.5 - tamanho / 2;
-        return {
-            ...base,
-            left: `${passo * left}%`,
-            top: `${passo * top}%`,
-            transform: 'rotate(90deg)'
-        };
+        return estiloNavioBase(tamanho, linha, coluna, dir, (n) => `${n * (100 / GRID)}%`);
     }
 
     function montarTabuleiroInimigo() {

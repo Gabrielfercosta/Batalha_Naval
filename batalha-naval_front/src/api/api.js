@@ -2,188 +2,86 @@ const BASE = 'http://localhost:8080/api/game';
 const AUTH_BASE = 'http://localhost:8080/api/auth';
 const MINADO_BASE = 'http://localhost:8080/api/minado';
 
+async function pedir(url, metodo = 'GET', corpo, comAuth = true) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (comAuth) headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
 
-export async function registrar(username, senha) {
-    const res = await fetch(`${AUTH_BASE}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, senha })
-    });
+    const opcoes = { method: metodo, headers };
+    if (corpo !== undefined) opcoes.body = JSON.stringify(corpo);
+
+    const res = await fetch(url, opcoes);
     if (!res.ok) {
-        const erro = await res.json();
-        throw new Error(erro.mensagem);
+        const erro = await res.json().catch(() => ({}));
+        throw new Error(erro.mensagem || 'Algo deu errado');
     }
-    return res.json();
+    const texto = await res.text();
+    return texto ? JSON.parse(texto) : null;
 }
 
-function authHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-    };
+export function registrar(username, senha) {
+    return pedir(`${AUTH_BASE}/register`, 'POST', { username, senha }, false);
 }
 
-export async function logar(username, senha) {
-    const res = await fetch(`${AUTH_BASE}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, senha })
-    });
-    if (!res.ok) {
-        const erro = await res.json();
-        throw new Error(erro.mensagem);
-    }
-    return res.json();
+export function logar(username, senha) {
+    return pedir(`${AUTH_BASE}/login`, 'POST', { username, senha }, false);
 }
 
-
-export async function criarPartida(jogador, nome, senha) {
-    const res = await fetch(`${BASE}/create`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ jogador, nome, senha })
-    });
-    return res.json();
+export function criarPartida(jogador, nome, senha) {
+    return pedir(`${BASE}/create`, 'POST', { jogador, nome, senha });
 }
 
-export async function entrarPartida(gameId, jogador, senha) {
-    const res = await fetch(`${BASE}/${gameId}/join`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ jogador, senha })
-    });
-    if (!res.ok) {
-        const erro = await res.json();
-        throw new Error(erro.mensagem);
-    }
-    return res.json();
+export function entrarPartida(gameId, jogador, senha) {
+    return pedir(`${BASE}/${gameId}/join`, 'POST', { jogador, senha });
 }
 
-export async function listarAbertas() {
-    const res = await fetch(`${BASE}/open`, {
-        headers: authHeaders()
-    });
-    return res.json();
+export function listarAbertas() {
+    return pedir(`${BASE}/open`);
 }
 
-export async function posicionarNavio(gameId, dados) {
-    const res = await fetch(`${BASE}/${gameId}/posicionar`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify(dados)
-    });
-    if (!res.ok) {
-        const erro = await res.json();
-        throw new Error(erro.mensagem);
-    }
-    return res.json();
+export function posicionarNavio(gameId, dados) {
+    return pedir(`${BASE}/${gameId}/posicionar`, 'POST', dados);
 }
 
-export async function marcarPronto(gameId, jogador) {
-    const res = await fetch(`${BASE}/${gameId}/pronto`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ jogador })
-    });
-    if (!res.ok) {
-        const erro = await res.json();
-        throw new Error(erro.mensagem);
-    }
-    return res.json();
+export function marcarPronto(gameId, jogador) {
+    return pedir(`${BASE}/${gameId}/pronto`, 'POST', { jogador });
 }
 
-export async function buscarPartida(gameId) {
-    const res = await fetch(`${BASE}/${gameId}`, {
-        headers: authHeaders()
-    });
-    return res.json();
+export function buscarPartida(gameId) {
+    return pedir(`${BASE}/${gameId}`);
 }
 
-export async function sairDaPartida(gameId, jogador) {
-    await fetch(`${BASE}/${gameId}/sair`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ jogador })
-    });
+export function sairDaPartida(gameId, jogador) {
+    return pedir(`${BASE}/${gameId}/sair`, 'POST', { jogador });
 }
 
-export async function sairDaPartidaMinada(gameId, jogador) {
-    await fetch(`${MINADO_BASE}/${gameId}/sair`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ jogador })
-    });
+export function sairDaPartidaMinada(gameId, jogador) {
+    return pedir(`${MINADO_BASE}/${gameId}/sair`, 'POST', { jogador });
 }
 
-export async function criarPartidaMinada(jogador, nome, senha) {
-    const res = await fetch(`${MINADO_BASE}/create`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ jogador, nome, senha })
-    });
-    return res.json();
+export function criarPartidaMinada(jogador, nome, senha) {
+    return pedir(`${MINADO_BASE}/create`, 'POST', { jogador, nome, senha });
 }
 
-export async function entrarPartidaMinada(gameId, jogador, senha) {
-    const res = await fetch(`${MINADO_BASE}/${gameId}/join`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ jogador, senha })
-    });
-    if (!res.ok) {
-        const erro = await res.json();
-        throw new Error(erro.mensagem);
-    }
-    return res.json();
+export function entrarPartidaMinada(gameId, jogador, senha) {
+    return pedir(`${MINADO_BASE}/${gameId}/join`, 'POST', { jogador, senha });
 }
 
-export async function listarAbertasMinada() {
-    const res = await fetch(`${MINADO_BASE}/open`, { headers: authHeaders() });
-    return res.json();
+export function listarAbertasMinada() {
+    return pedir(`${MINADO_BASE}/open`);
 }
 
-export async function posicionarNavioMinado(gameId, dados) {
-    const res = await fetch(`${MINADO_BASE}/${gameId}/navio`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify(dados)
-    });
-    if (!res.ok) {
-        const erro = await res.json();
-        throw new Error(erro.mensagem);
-    }
-    return res.json();
+export function posicionarNavioMinado(gameId, dados) {
+    return pedir(`${MINADO_BASE}/${gameId}/navio`, 'POST', dados);
 }
 
-export async function posicionarMinaMinado(gameId, dados) {
-    const res = await fetch(`${MINADO_BASE}/${gameId}/mina`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify(dados)
-    });
-    if (!res.ok) {
-        const erro = await res.json();
-        throw new Error(erro.mensagem);
-    }
-    return res.json();
+export function posicionarMinaMinado(gameId, dados) {
+    return pedir(`${MINADO_BASE}/${gameId}/mina`, 'POST', dados);
 }
 
-export async function marcarProntoMinado(gameId, jogador) {
-    const res = await fetch(`${MINADO_BASE}/${gameId}/pronto`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ jogador })
-    });
-    if (!res.ok) {
-        const erro = await res.json();
-        throw new Error(erro.mensagem);
-    }
-    return res.json();
+export function marcarProntoMinado(gameId, jogador) {
+    return pedir(`${MINADO_BASE}/${gameId}/pronto`, 'POST', { jogador });
 }
 
-export async function buscarPartidaMinada(gameId) {
-    const res = await fetch(`${MINADO_BASE}/${gameId}`, { headers: authHeaders() });
-    return res.json();
+export function buscarPartidaMinada(gameId) {
+    return pedir(`${MINADO_BASE}/${gameId}`);
 }
-

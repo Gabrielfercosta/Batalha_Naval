@@ -6,6 +6,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -25,10 +26,10 @@ public class MinadoWebSocketController {
     }
 
     @MessageMapping("/minado/{gameId}/tiro")
-    public void atirar(@DestinationVariable String gameId, Map<String, Object> body) {
-        String jogador = (String) body.get("jogador");
-        int linha = ((Number) body.get("linha")).intValue();
-        int coluna = ((Number) body.get("coluna")).intValue();
+    public void atirar(@DestinationVariable String gameId, TiroMinadoRequest request, Principal principal) {
+        String jogador = principal.getName();
+        int linha = request.getLinha();
+        int coluna = request.getColuna();
 
         try {
             PartidaMinada partida = minadoService.buscarPartida(gameId);
@@ -67,8 +68,8 @@ public class MinadoWebSocketController {
     }
 
     @MessageMapping("/minado/{gameId}/cheguei")
-    public void cheguei(@DestinationVariable String gameId, Map<String, Object> body) {
-        String jogador = (String) body.get("jogador");
+    public void cheguei(@DestinationVariable String gameId, Principal principal) {
+        String jogador = principal.getName();
         try {
             PartidaMinada partida = minadoService.buscarPartida(gameId);
             if (partida.registrarChegada(jogador)) {

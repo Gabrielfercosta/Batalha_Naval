@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -19,15 +20,15 @@ public class GameController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping("/create")
-    public PartidaResponse criar(@RequestBody CriarPartidaRequest request) {
-        String gameId = gameService.criarPartida(request.getJogador(), request.getNome(), request.getSenha());
+    public PartidaResponse criar(@RequestBody CriarPartidaRequest request, Principal principal) {
+        String gameId = gameService.criarPartida(principal.getName(), request.getNome(), request.getSenha());
         Partida partida = gameService.buscarPartida(gameId);
         return new PartidaResponse(gameId, partida);
     }
 
     @PostMapping("/{gameId}/join")
-    public PartidaResponse entrar(@PathVariable String gameId, @RequestBody EntrarPartidaRequest request) {
-        Partida partida = gameService.entrarNaPartida(gameId, request.getJogador(), request.getSenha());
+    public PartidaResponse entrar(@PathVariable String gameId, @RequestBody EntrarPartidaRequest request, Principal principal) {
+        Partida partida = gameService.entrarNaPartida(gameId, principal.getName(), request.getSenha());
         return new PartidaResponse(gameId, partida);
     }
 
@@ -43,10 +44,10 @@ public class GameController {
     }
 
     @PostMapping("/{gameId}/posicionar")
-    public PartidaResponse posicionar(@PathVariable String gameId, @RequestBody PosicionarNavioRequest request) {
+    public PartidaResponse posicionar(@PathVariable String gameId, @RequestBody PosicionarNavioRequest request, Principal principal) {
         gameService.posicionarNavio(
                 gameId,
-                request.getJogador(),
+                principal.getName(),
                 request.getTipo(),
                 request.getLinha(),
                 request.getColuna(),
@@ -57,8 +58,8 @@ public class GameController {
     }
 
     @PostMapping("/{gameId}/pronto")
-    public PartidaResponse pronto(@PathVariable String gameId, @RequestBody EntrarPartidaRequest request) {
-        Partida partida = gameService.marcarPronto(gameId, request.getJogador());
+    public PartidaResponse pronto(@PathVariable String gameId, Principal principal) {
+        Partida partida = gameService.marcarPronto(gameId, principal.getName());
 
         if (partida.getStatus() == StatusPartida.EM_ANDAMENTO) {
             TiroResponse inicio = new TiroResponse(
@@ -73,16 +74,9 @@ public class GameController {
         return new PartidaResponse(gameId, partida);
     }
 
-    @PostMapping("/{gameId}/iniciar")
-    public PartidaResponse iniciar(@PathVariable String gameId) {
-        gameService.iniciarBatalha(gameId);
-        Partida partida = gameService.buscarPartida(gameId);
-        return new PartidaResponse(gameId, partida);
-    }
-
     @PostMapping("/{gameId}/sair")
-    public void sair(@PathVariable String gameId, @RequestBody EntrarPartidaRequest request) {
-        Partida partida = gameService.sairDaPartida(gameId, request.getJogador());
+    public void sair(@PathVariable String gameId, Principal principal) {
+        Partida partida = gameService.sairDaPartida(gameId, principal.getName());
         if (partida != null) {
             TiroResponse aviso = new TiroResponse(
                     null, -1, -1, null,

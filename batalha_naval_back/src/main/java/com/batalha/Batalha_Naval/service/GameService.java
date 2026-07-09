@@ -79,11 +79,6 @@ public class GameService {
         return partida;
     }
 
-    public void iniciarBatalha(String gameId) {
-        Partida partida = buscarPartida(gameId);
-        partida.iniciarBatalha();
-    }
-
     public Partida sairDaPartida(String gameId, String jogador) {
         Partida partida = partidas.get(gameId);
         if (partida == null) return null;

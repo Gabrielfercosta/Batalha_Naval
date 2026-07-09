@@ -1,12 +1,13 @@
 package com.batalha.Batalha_Naval.minado;
 
-import com.batalha.Batalha_Naval.dominio.Direcao;
+import com.batalha.Batalha_Naval.dto.CriarPartidaRequest;
+import com.batalha.Batalha_Naval.dto.EntrarPartidaRequest;
 import com.batalha.Batalha_Naval.dto.SalaResponse;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/minado")
@@ -21,14 +22,14 @@ public class MinadoController {
     }
 
     @PostMapping("/create")
-    public PartidaMinadaResponse criar(@RequestBody Map<String, String> body) {
-        String gameId = minadoService.criarPartida(body.get("jogador"), body.get("nome"), body.get("senha"));
+    public PartidaMinadaResponse criar(@RequestBody CriarPartidaRequest request, Principal principal) {
+        String gameId = minadoService.criarPartida(principal.getName(), request.getNome(), request.getSenha());
         return new PartidaMinadaResponse(gameId, minadoService.buscarPartida(gameId));
     }
 
     @PostMapping("/{gameId}/join")
-    public PartidaMinadaResponse entrar(@PathVariable String gameId, @RequestBody Map<String, String> body) {
-        PartidaMinada p = minadoService.entrarNaPartida(gameId, body.get("jogador"), body.get("senha"));
+    public PartidaMinadaResponse entrar(@PathVariable String gameId, @RequestBody EntrarPartidaRequest request, Principal principal) {
+        PartidaMinada p = minadoService.entrarNaPartida(gameId, principal.getName(), request.getSenha());
         return new PartidaMinadaResponse(gameId, p);
     }
 
@@ -43,8 +44,8 @@ public class MinadoController {
     }
 
     @PostMapping("/{gameId}/sair")
-    public void sair(@PathVariable String gameId, @RequestBody java.util.Map<String, String> body) {
-        PartidaMinada partida = minadoService.sairDaPartida(gameId, body.get("jogador"));
+    public void sair(@PathVariable String gameId, Principal principal) {
+        PartidaMinada partida = minadoService.sairDaPartida(gameId, principal.getName());
         if (partida != null) {
             TiroMinadoResponse aviso = new TiroMinadoResponse(
                     null, -1, -1, null,
@@ -54,28 +55,28 @@ public class MinadoController {
     }
 
     @PostMapping("/{gameId}/navio")
-    public PartidaMinadaResponse posicionarNavio(@PathVariable String gameId, @RequestBody Map<String, Object> body) {
+    public PartidaMinadaResponse posicionarNavio(@PathVariable String gameId, @RequestBody PosicionarNavioMinadoRequest request, Principal principal) {
         minadoService.posicionarNavio(gameId,
-                (String) body.get("jogador"),
-                ((Number) body.get("linha")).intValue(),
-                ((Number) body.get("coluna")).intValue(),
-                ((Number) body.get("tamanho")).intValue(),
-                Direcao.valueOf((String) body.get("direcao")));
+                principal.getName(),
+                request.getLinha(),
+                request.getColuna(),
+                request.getTamanho(),
+                request.getDirecao());
         return new PartidaMinadaResponse(gameId, minadoService.buscarPartida(gameId));
     }
 
     @PostMapping("/{gameId}/mina")
-    public PartidaMinadaResponse posicionarMina(@PathVariable String gameId, @RequestBody Map<String, Object> body) {
+    public PartidaMinadaResponse posicionarMina(@PathVariable String gameId, @RequestBody PosicionarMinaRequest request, Principal principal) {
         minadoService.posicionarMina(gameId,
-                (String) body.get("jogador"),
-                ((Number) body.get("linha")).intValue(),
-                ((Number) body.get("coluna")).intValue());
+                principal.getName(),
+                request.getLinha(),
+                request.getColuna());
         return new PartidaMinadaResponse(gameId, minadoService.buscarPartida(gameId));
     }
 
     @PostMapping("/{gameId}/pronto")
-    public PartidaMinadaResponse pronto(@PathVariable String gameId, @RequestBody Map<String, String> body) {
-        PartidaMinada p = minadoService.marcarPronto(gameId, body.get("jogador"));
+    public PartidaMinadaResponse pronto(@PathVariable String gameId, Principal principal) {
+        PartidaMinada p = minadoService.marcarPronto(gameId, principal.getName());
         if (p.getStatus() == StatusPartidaMinada.EM_ANDAMENTO) {
             TiroMinadoResponse inicio = new TiroMinadoResponse(
                     null, -1, -1, null,

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { conectar, atirar } from '../ws/socket';
 import { buscarPartida } from '../api/api';
 import { tocarMusica, tocarSom } from '../audio/musica';
+import { estiloNavio as estiloNavioBase } from '../utils/navios';
 
 const SPRITES = {
     PORTA_AVIOES: '/navios/carrier.png',
@@ -10,8 +11,6 @@ const SPRITES = {
     SUBMARINO: '/navios/submarine.png',
     DESTROYER: '/navios/destroyer.png'
 };
-const ESPESSURA = 1.3;
-const CELULA = 40;
 
 function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
     const [client, setClient] = useState(null);
@@ -82,7 +81,7 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
         return 'celula';
     }
 
-    function montarTabuleiro(tiros, clicavel, ehInimigo) {
+    function montarTabuleiro(tiros, clicavel) {
         const linhas = [];
         for (let l = 0; l < 10; l++) {
             const celulas = [];
@@ -104,23 +103,7 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
     }
 
     function estiloNavio(tamanho, linha, coluna, dir) {
-        const horizontal = dir === 'HORIZONTAL';
-        const base = {
-            position: 'absolute',
-            width: `calc(var(--celula) * ${ESPESSURA})`,
-            height: `calc(var(--celula) * ${tamanho})`,
-            objectFit: 'fill',
-            pointerEvents: 'none',
-            '--rot': horizontal ? '90deg' : '0deg',
-            transform: 'rotate(var(--rot))'
-        };
-        if (!horizontal) {
-            const left = coluna + 0.5 - ESPESSURA / 2;
-            return { ...base, left: `calc(var(--celula) * ${left})`, top: `calc(var(--celula) * ${linha})` };
-        }
-        const left = coluna + tamanho / 2 - ESPESSURA / 2;
-        const top = linha + 0.5 - tamanho / 2;
-        return { ...base, left: `calc(var(--celula) * ${left})`, top: `calc(var(--celula) * ${top})` };
+        return estiloNavioBase(tamanho, linha, coluna, dir, (n) => `calc(var(--celula) * ${n})`);
     }
 
     function navioAfundado(navio) {
@@ -170,10 +153,10 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
 
             <div className="arena">
                 <div className="lago-grid lago-esquerdo">
-                    {montarTabuleiro(meusTiros, true, true)}
+                    {montarTabuleiro(meusTiros, true)}
                 </div>
                 <div className="lago-grid lago-direito">
-                    {montarTabuleiro(tirosInimigos, false, false)}
+                    {montarTabuleiro(tirosInimigos, false)}
                     {camadaNavios()}
                 </div>
             </div>

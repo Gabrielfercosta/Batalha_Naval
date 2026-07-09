@@ -18,6 +18,7 @@ public class Partida {
     private final String nome;
     private final String senha;
     private final long criadaEm = System.currentTimeMillis();
+    public static final int TOTAL_NAVIOS = 5;
 
     public Partida(String jogador1, String nome, String senha) {
         this.jogador1 = jogador1;
@@ -50,16 +51,13 @@ public class Partida {
         }
     }
 
-    public void iniciarBatalha() {
-        if (status != StatusPartida.POSICIONANDO) {
-            throw new IllegalStateException("A partida não está na fase de posicionamento.");
-        }
-        this.status = StatusPartida.EM_ANDAMENTO;
-    }
-
     public void marcarPronto(String jogador) {
         if (status == StatusPartida.EM_ANDAMENTO || status == StatusPartida.FINALIZADA) {
             throw new IllegalStateException("A partida já começou ou terminou.");
+        }
+        Tabuleiro tab = jogador.equals(jogador1) ? tabuleiro1 : tabuleiro2;
+        if (tab.getNavios().size() < TOTAL_NAVIOS) {
+            throw new IllegalStateException("Posicione todos os navios antes de ficar pronto.");
         }
         prontos.add(jogador);
         if (jogador2 != null && prontos.contains(jogador1) && prontos.contains(jogador2)) {

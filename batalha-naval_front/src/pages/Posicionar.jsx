@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { posicionarNavio, marcarPronto } from '../api/api';
+import { estiloNavio as estiloNavioBase } from '../utils/navios';
 
 const FROTA = [
     { tipo: 'PORTA_AVIOES', tamanho: 5 },
@@ -18,7 +19,6 @@ const SPRITES = {
 };
 
 const CELULA = 40;
-const ESPESSURA = 1.3;
 
 function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
     const [indice, setIndice] = useState(0);
@@ -32,16 +32,7 @@ function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
     const acabou = indice >= FROTA.length;
 
     function estiloNavio(tamanho, linha, coluna, dir) {
-        const horizontal = dir === 'HORIZONTAL';
-        const largura = CELULA * ESPESSURA;
-        const comprimento = CELULA * tamanho;
-        const base = { position: 'absolute', width: largura, height: comprimento, objectFit: 'fill', pointerEvents: 'none' };
-        if (!horizontal) {
-            return { ...base, left: (coluna + 0.5) * CELULA - largura / 2, top: linha * CELULA };
-        }
-        const centroX = (coluna + tamanho / 2) * CELULA;
-        const centroY = (linha + 0.5) * CELULA;
-        return { ...base, left: centroX - largura / 2, top: centroY - comprimento / 2, transform: 'rotate(90deg)' };
+        return estiloNavioBase(tamanho, linha, coluna, dir, (n) => n * CELULA);
     }
 
     function previaValida(linha, coluna) {

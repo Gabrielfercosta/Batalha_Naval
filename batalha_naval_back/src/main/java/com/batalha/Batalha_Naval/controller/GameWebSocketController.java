@@ -13,6 +13,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.security.Principal;
+
 @Controller
 @AllArgsConstructor
 public class GameWebSocketController {
@@ -21,16 +23,17 @@ public class GameWebSocketController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/game/{gameId}/tiro")
-    public void atirar(@DestinationVariable String gameId, TiroRequest request) {
+    public void atirar(@DestinationVariable String gameId, TiroRequest request, Principal principal) {
+        String jogador = principal.getName();
         try {
             Coordenada tiro = new Coordenada(request.getLinha(), request.getColuna());
 
-            ResultadoTiro resultado = gameService.atirar(gameId, request.getJogador(), tiro);
+            ResultadoTiro resultado = gameService.atirar(gameId, jogador, tiro);
 
             Partida partida = gameService.buscarPartida(gameId);
 
             TiroResponse response = new TiroResponse(
-                    request.getJogador(),
+                    jogador,
                     request.getLinha(),
                     request.getColuna(),
                     resultado,
@@ -43,7 +46,7 @@ public class GameWebSocketController {
 
         } catch (Exception e) {
             messagingTemplate.convertAndSend(
-                    "/topic/game/" + gameId + "/erro/" + request.getJogador(),
+                    "/topic/game/" + gameId + "/erro/" + jogador,
                     new ErroResponse(e.getMessage())
             );
         }

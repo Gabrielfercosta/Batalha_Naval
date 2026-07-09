@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { posicionarMinaMinado, marcarProntoMinado } from '../api/api';
+import { estiloNavio as estiloNavioBase } from '../utils/navios';
 
 const CELULA = 28;
-const ESPESSURA = 1.3;
 const GRID = 16;
 const QTD_MINAS = 20;
 
@@ -21,16 +21,7 @@ function PosicionarMinasMinado({ jogador, gameId, naviosColocados, ocupadas, aoC
     const acabou = faltam <= 0;
 
     function estiloNavio(tamanho, linha, coluna, dir) {
-        const horizontal = dir === 'HORIZONTAL';
-        const largura = CELULA * ESPESSURA;
-        const comprimento = CELULA * tamanho;
-        const base = { position: 'absolute', width: largura, height: comprimento, objectFit: 'fill', pointerEvents: 'none' };
-        if (!horizontal) {
-            return { ...base, left: (coluna + 0.5) * CELULA - largura / 2, top: linha * CELULA };
-        }
-        const centroX = (coluna + tamanho / 2) * CELULA;
-        const centroY = (linha + 0.5) * CELULA;
-        return { ...base, left: centroX - largura / 2, top: centroY - comprimento / 2, transform: 'rotate(90deg)' };
+        return estiloNavioBase(tamanho, linha, coluna, dir, (n) => n * CELULA);
     }
 
     async function clicarCelula(linha, coluna) {
