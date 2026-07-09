@@ -4,7 +4,7 @@ import { Client } from '@stomp/stompjs';
 export function conectar(gameId, jogador, aoReceberTiro, aoReceberErro) {
     const token = localStorage.getItem('token');
     const client = new Client({
-        webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+        webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/ws`),
         connectHeaders: { Authorization: `Bearer ${token}` },
         onConnect: () => {
             client.subscribe(`/topic/game/${gameId}`, (msg) => {
@@ -31,7 +31,7 @@ export function atirar(client, gameId, jogador, linha, coluna) {
 export function conectarMinado(gameId, jogador, aoReceberTiro, aoReceberErro, aoContagem) {
     const token = localStorage.getItem('token');
     const client = new Client({
-        webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+        webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/ws`),
         connectHeaders: { Authorization: `Bearer ${token}` },
         onConnect: () => {
             client.subscribe(`/topic/minado/${gameId}`, (msg) => {

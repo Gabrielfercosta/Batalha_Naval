@@ -1,6 +1,7 @@
-const BASE = 'http://localhost:8080/api/game';
-const AUTH_BASE = 'http://localhost:8080/api/auth';
-const MINADO_BASE = 'http://localhost:8080/api/minado';
+const API_HOST = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const BASE = `${API_HOST}/api/game`;
+const AUTH_BASE = `${API_HOST}/api/auth`;
+const MINADO_BASE = `${API_HOST}/api/minado`;
 
 async function pedir(url, metodo = 'GET', corpo, comAuth = true) {
     const headers = { 'Content-Type': 'application/json' };
