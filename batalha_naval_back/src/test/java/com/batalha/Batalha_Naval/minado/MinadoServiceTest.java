@@ -4,6 +4,7 @@ import com.batalha.Batalha_Naval.dominio.Direcao;
 import com.batalha.Batalha_Naval.dto.SalaResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import com.batalha.Batalha_Naval.dominio.StatusPartida;
 
 import java.util.List;
 
@@ -43,7 +44,7 @@ class MinadoServiceTest {
         String id = minadoService.criarPartida("Alice", "Sala1", null);
         PartidaMinada p = minadoService.entrarNaPartida(id, "Bob", null);
         assertEquals("Bob", p.getJogador2());
-        assertEquals(StatusPartidaMinada.POSICIONANDO, p.getStatus());
+        assertEquals(StatusPartida.POSICIONANDO, p.getStatus());
     }
 
     @Test
@@ -92,7 +93,7 @@ class MinadoServiceTest {
         minadoService.marcarPronto(id, "Bob");
 
         PartidaMinada p = minadoService.sairDaPartida(id, "Alice");
-        assertEquals(StatusPartidaMinada.FINALIZADA, p.getStatus());
+        assertEquals(StatusPartida.FINALIZADA, p.getStatus());
         assertEquals("Bob", p.getVencedor());
     }
 
@@ -113,7 +114,7 @@ class MinadoServiceTest {
 
         PartidaMinada p = minadoService.buscarPartida(id);
         assertNull(p.getJogador2());
-        assertEquals(StatusPartidaMinada.AGUARDANDO, p.getStatus());
+        assertEquals(StatusPartida.AGUARDANDO, p.getStatus());
     }
 
     private void posicionarTudo(String id, String jogador) {

@@ -1,5 +1,6 @@
 package com.batalha.Batalha_Naval.minado;
 
+import com.batalha.Batalha_Naval.dominio.StatusPartida;
 import com.batalha.Batalha_Naval.dto.CriarPartidaRequest;
 import com.batalha.Batalha_Naval.dto.EntrarPartidaRequest;
 import com.batalha.Batalha_Naval.dto.SalaResponse;
@@ -77,7 +78,7 @@ public class MinadoController {
     @PostMapping("/{gameId}/pronto")
     public PartidaMinadaResponse pronto(@PathVariable String gameId, Principal principal) {
         PartidaMinada p = minadoService.marcarPronto(gameId, principal.getName());
-        if (p.getStatus() == StatusPartidaMinada.EM_ANDAMENTO) {
+        if (p.getStatus() == StatusPartida.EM_ANDAMENTO) {
             TiroMinadoResponse inicio = new TiroMinadoResponse(
                     null, -1, -1, null,
                     p.getTurnoAtual(), p.getStatus(), p.getVencedor(),

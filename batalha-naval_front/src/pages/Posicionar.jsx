@@ -54,9 +54,9 @@ function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
                 if (direcao === 'HORIZONTAL') novas.push(`${linha}-${coluna + i}`);
                 else novas.push(`${linha + i}-${coluna}`);
             }
-            setOcupadas([...ocupadas, ...novas]);
-            setNaviosColocados([...naviosColocados, { tipo: navioAtual.tipo, tamanho: navioAtual.tamanho, linha, coluna, direcao }]);
-            setIndice(indice + 1);
+            setOcupadas((atuais) => [...atuais, ...novas]);
+            setNaviosColocados((atuais) => [...atuais, { tipo: navioAtual.tipo, tamanho: navioAtual.tamanho, linha, coluna, direcao }]);
+            setIndice((i) => i + 1);
             setMensagem('');
         } catch (e) {
             setMensagem(e.message);

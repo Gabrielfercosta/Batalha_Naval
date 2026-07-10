@@ -3,6 +3,7 @@ package com.batalha.Batalha_Naval.minado;
 import com.batalha.Batalha_Naval.dominio.Direcao;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import com.batalha.Batalha_Naval.dominio.StatusPartida;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,7 +18,7 @@ class PartidaMinadaTest {
 
     @Test
     void partidaCriadaComStatusAguardando() {
-        assertEquals(StatusPartidaMinada.AGUARDANDO, partida.getStatus());
+        assertEquals(StatusPartida.AGUARDANDO, partida.getStatus());
         assertEquals("Alice", partida.getJogador1());
         assertNull(partida.getJogador2());
     }
@@ -26,7 +27,7 @@ class PartidaMinadaTest {
     void jogador2Entra() {
         partida.entrar("Bob", null);
         assertEquals("Bob", partida.getJogador2());
-        assertEquals(StatusPartidaMinada.POSICIONANDO, partida.getStatus());
+        assertEquals(StatusPartida.POSICIONANDO, partida.getStatus());
     }
 
     @Test
@@ -60,10 +61,10 @@ class PartidaMinadaTest {
         posicionarTudo("Bob");
 
         partida.marcarPronto("Alice");
-        assertEquals(StatusPartidaMinada.POSICIONANDO, partida.getStatus());
+        assertEquals(StatusPartida.POSICIONANDO, partida.getStatus());
 
         partida.marcarPronto("Bob");
-        assertEquals(StatusPartidaMinada.EM_ANDAMENTO, partida.getStatus());
+        assertEquals(StatusPartida.EM_ANDAMENTO, partida.getStatus());
     }
 
     @Test
@@ -124,7 +125,7 @@ class PartidaMinadaTest {
         partida.atirar("Alice", 6, 0);
         ResultadoTiroMinado r2 = partida.atirar("Alice", 6, 1);
         assertEquals(ResultadoTiroMinado.MINA, r2);
-        assertEquals(StatusPartidaMinada.FINALIZADA, partida.getStatus());
+        assertEquals(StatusPartida.FINALIZADA, partida.getStatus());
         assertEquals("Bob", partida.getVencedor());
     }
 
@@ -155,7 +156,7 @@ class PartidaMinadaTest {
         for (int c = 0; c < 3; c++) partida.atirar("Alice", 3, c);
         for (int c = 0; c < 2; c++) partida.atirar("Alice", 4, c);
 
-        assertEquals(StatusPartidaMinada.FINALIZADA, partida.getStatus());
+        assertEquals(StatusPartida.FINALIZADA, partida.getStatus());
         assertEquals("Alice", partida.getVencedor());
     }
 
@@ -168,7 +169,7 @@ class PartidaMinadaTest {
         partida.marcarPronto("Bob");
 
         partida.abandonar("Alice");
-        assertEquals(StatusPartidaMinada.FINALIZADA, partida.getStatus());
+        assertEquals(StatusPartida.FINALIZADA, partida.getStatus());
         assertEquals("Bob", partida.getVencedor());
     }
 
@@ -177,7 +178,7 @@ class PartidaMinadaTest {
         partida.entrar("Bob", null);
         partida.removerJogador2();
         assertNull(partida.getJogador2());
-        assertEquals(StatusPartidaMinada.AGUARDANDO, partida.getStatus());
+        assertEquals(StatusPartida.AGUARDANDO, partida.getStatus());
     }
 
     private void posicionarTudo(String jogador) {

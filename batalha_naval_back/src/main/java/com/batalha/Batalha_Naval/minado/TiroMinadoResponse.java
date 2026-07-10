@@ -2,7 +2,7 @@ package com.batalha.Batalha_Naval.minado;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
+import com.batalha.Batalha_Naval.dominio.StatusPartida;
 import java.util.List;
 
 @Getter
@@ -13,7 +13,7 @@ public class TiroMinadoResponse {
     private final int coluna;
     private final ResultadoTiroMinado resultado;
     private final String turnoAtual;
-    private final StatusPartidaMinada status;
+    private final StatusPartida status;
     private final String vencedor;
     private final List<CasaRevelada> casasReveladas;
 }

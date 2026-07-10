@@ -30,7 +30,7 @@ function PosicionarMinasMinado({ jogador, gameId, naviosColocados, ocupadas, aoC
         if (minasColocadas.some(m => m.linha === linha && m.coluna === coluna)) { setMensagem('Já tem mina aqui.'); return; }
         try {
             await posicionarMinaMinado(gameId, { jogador, linha, coluna });
-            setMinasColocadas([...minasColocadas, { linha, coluna }]);
+            setMinasColocadas((atuais) => [...atuais, { linha, coluna }]);
             setMensagem('');
         } catch (e) {
             setMensagem(e.message);

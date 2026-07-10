@@ -16,7 +16,7 @@ const TUTORIAIS = {
         titulo: 'Batalha Minada',
         passos: [
             'Objetivo: encontrar toda a frota inimiga antes do adversário — sem pisar numa mina!',
-            'Tabuleiro 16x16: posicione seus navios E suas 20 minas.',
+            'Tabuleiro 16x16: posicione seus navios e suas 20 minas.',
             'É uma corrida: os dois jogam ao mesmo tempo.',
             'Clique no Mar Inimigo para procurar. A água revela pistas (💣 minas e 🚢 navios por perto).',
             'Achou todos os navios inimigos? Você vence. Mas se acertar uma mina, você perde!',
