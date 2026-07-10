@@ -463,8 +463,8 @@ input:focus {
 .arena-min .lago-grid { top: 48%; }
 
 @keyframes afundar {
-  0%   { transform: translateY(0) rotate(var(--rot)); opacity: 1; filter: brightness(1); }
-  100% { transform: translateY(calc(var(--celula) * 1.6)) rotate(calc(var(--rot) + 20deg)); opacity: 0; filter: brightness(0.3); }
+  0%   { translate: 0 0; opacity: 1; filter: brightness(1); }
+  100% { translate: 0 calc(var(--celula) * 1.6); opacity: 0; filter: brightness(0.3); }
 }
 
 .navio-afundando {
@@ -494,6 +494,14 @@ input:focus {
     animation: explodir-flip 0.6s forwards;
     z-index: 5;
     pointer-events: none;
+}
+
+.afundado {
+  background: rgba(200, 30, 30, 0.6);
+}
+
+.afundado::after {
+  display: none;
 }
 
 @keyframes explodir-flip {

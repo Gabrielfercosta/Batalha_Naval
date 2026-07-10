@@ -32,6 +32,8 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada }) {
     const [modo, setModo] = useState('classico');
     const [mensagem, setMensagem] = useState('');
     const [ajuda, setAjuda] = useState(null);
+    const [salaComSenha, setSalaComSenha] = useState(null);
+    const [senhaDigitada, setSenhaDigitada] = useState('');
 
     async function carregarSalas() {
         const classicas = await listarAbertas();
@@ -41,7 +43,11 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada }) {
         setSalas([...todasClassicas, ...todasMinadas]);
     }
 
-    useEffect(() => { carregarSalas(); }, []);
+    useEffect(() => {
+        carregarSalas();
+        const intervalo = setInterval(carregarSalas, 5000);
+        return () => clearInterval(intervalo);
+    }, []);
 
     async function criar() {
         if (nome.trim() === '') { setMensagem('Dê um nome pra sala.'); return; }
@@ -57,17 +63,37 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada }) {
     }
 
     async function entrar(sala) {
-        let senhaDigitada = '';
-        if (sala.temSenha) senhaDigitada = window.prompt('Senha da sala:') || '';
+        if (sala.temSenha) {
+            setSalaComSenha(sala);
+            setSenhaDigitada('');
+            return;
+        }
         try {
             if (sala.modo === 'classico') {
-                await entrarPartida(sala.gameId, jogador, senhaDigitada);
+                await entrarPartida(sala.gameId, jogador, '');
                 aoIniciarPartida(sala.gameId);
             } else {
-                await entrarPartidaMinada(sala.gameId, jogador, senhaDigitada);
+                await entrarPartidaMinada(sala.gameId, jogador, '');
                 aoIniciarMinada(sala.gameId);
             }
         } catch (e) { setMensagem(e.message); }
+    }
+
+    async function confirmarSenha() {
+        if (!salaComSenha) return;
+        try {
+            if (salaComSenha.modo === 'classico') {
+                await entrarPartida(salaComSenha.gameId, jogador, senhaDigitada);
+                aoIniciarPartida(salaComSenha.gameId);
+            } else {
+                await entrarPartidaMinada(salaComSenha.gameId, jogador, senhaDigitada);
+                aoIniciarMinada(salaComSenha.gameId);
+            }
+            setSalaComSenha(null);
+        } catch (e) {
+            setMensagem(e.message);
+            setSalaComSenha(null);
+        }
     }
 
     return (
@@ -99,7 +125,7 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada }) {
             <ul className="lista-salas">
                 {salas.map((sala) => (
                     <li key={sala.gameId} className="sala-item">
-                        <span>{sala.modo === 'minada' ? '💣' : '🚢'} {sala.temSenha ? '🔒 ' : ''}{sala.nome}</span>
+                        <span>{sala.modo === 'minada' ? '💣' : '🚢'} {sala.temSenha ? '🔒 ' : ''}{sala.nome} <span style={{ fontSize: 12, opacity: 0.7 }}>({sala.criador} · {sala.jogadores}/2)</span></span>
                         <button onClick={() => entrar(sala)}>Entrar</button>
                     </li>
                 ))}
@@ -112,6 +138,28 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada }) {
                         <ul className="modal-lista">
                             {TUTORIAIS[ajuda].passos.map((passo, i) => <li key={i}>{passo}</li>)}
                         </ul>
+                    </div>
+                </div>
+            )}
+            {salaComSenha && (
+                <div className="modal-fundo" onClick={() => setSalaComSenha(null)}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()} style={{ textAlign: 'center' }}>
+                        <button className="modal-fechar" onClick={() => setSalaComSenha(null)}>✕</button>
+                        <h2 style={{ margin: '0 0 4px' }}>🔒 Sala Protegida</h2>
+                        <p style={{ margin: '0 0 14px', fontSize: 15 }}>Digite a senha para entrar em <strong>{salaComSenha.nome}</strong></p>
+                        <input
+                            type="password"
+                            value={senhaDigitada}
+                            onChange={(e) => setSenhaDigitada(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && confirmarSenha()}
+                            placeholder="Senha da sala"
+                            autoFocus
+                            style={{ width: '100%', maxWidth: 260 }}
+                        />
+                        <div style={{ marginTop: 14 }}>
+                            <button onClick={confirmarSenha}>Entrar</button>
+                            <button onClick={() => setSalaComSenha(null)} style={{ opacity: 0.7 }}>Cancelar</button>
+                        </div>
                     </div>
                 </div>
             )}

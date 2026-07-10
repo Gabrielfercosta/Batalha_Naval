@@ -52,7 +52,7 @@ public class GameService {
             Partida p = partidas.get(id);
             if (p.getStatus() == StatusPartida.AGUARDANDO) {
                 boolean temSenha = p.getSenha() != null && !p.getSenha().isBlank();
-                abertas.add(new SalaResponse(id, p.getNome(), temSenha));
+                abertas.add(new SalaResponse(id, p.getNome(), temSenha, p.getJogador1(), 1));
             }
         }
         return abertas;

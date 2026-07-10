@@ -76,7 +76,8 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
     }
 
     function classeCelula(resultado) {
-        if (resultado === 'ACERTO' || resultado === 'AFUNDADO') return 'celula fogo';
+        if (resultado === 'AFUNDADO') return 'celula fogo afundado';
+        if (resultado === 'ACERTO') return 'celula fogo';
         if (resultado === 'AGUA') return 'celula agua-tiro';
         return 'celula';
     }
