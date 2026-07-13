@@ -27,7 +27,7 @@ function PosicionarNaviosMinado({ jogador, gameId, aoTerminar, aoVoltar }) {
     const [ocupadas, setOcupadas] = useState([]);
     const [hover, setHover] = useState(null);
     const [mensagem, setMensagem] = useState('');
-
+    const enviando = useRef(false);
     const navioAtual = FROTA[indice];
     const acabou = indice >= FROTA.length;
 
