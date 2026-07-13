@@ -24,6 +24,7 @@ function App() {
     const [mudo, setMudo] = useState(estaMudo());
     const [somAtivado, setSomAtivado] = useState(false);
     const [volume, setVolume] = useState(pegarVolume());
+    const [mostrarVolume, setMostrarVolume] = useState(false);
 
     useEffect(() => {
         const tokenSalvo = localStorage.getItem('token');
@@ -107,19 +108,13 @@ function App() {
             {!somAtivado && (
                 <div className="dica-som">🔊 Clique para ativar o som</div>
             )}
-            <div style={{ position: 'fixed', top: 12, left: 12, zIndex: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ position: 'fixed', top: 12, left: 12, zIndex: 600, display: 'flex', alignItems: 'center', gap: 8 }} onMouseEnter={() => setMostrarVolume(true)} onMouseLeave={() => setMostrarVolume(false)}>
                 <button className="btn-mudo" style={{ position: 'static' }} onClick={() => setMudo(alternarMudo())}>
                     {mudo ? '🔇' : '🔊'}
                 </button>
-                <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.05"
-                    value={volume}
-                    onChange={(e) => { const v = parseFloat(e.target.value); setVolume(v); definirVolume(v); }}
-                    style={{ width: 90, cursor: 'pointer', accentColor: 'var(--azul-ceu)' }}
-                />
+                {mostrarVolume && (
+                    <input type="range" min="0" max="1" step="0.05" value={volume} onChange={(e) => { const v = parseFloat(e.target.value); setVolume(v); definirVolume(v); }} className="slider-volume"/>
+                )}
             </div>
             {tela !== 'batalha' && tela !== 'batalhaMinada' && tela !== 'loading' && tela !== 'home' && <img src="/titulo.png" alt="Batalha Naval" className="titulo-logo" />
             }
