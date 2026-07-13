@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { posicionarNavioMinado } from '../api/api';
 import { estiloNavio as estiloNavioBase } from '../utils/navios';
-import { useEffect, useState, useRef } from 'react';
-
 
 const FROTA = [
     { tamanho: 5 },
