@@ -28,6 +28,8 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
     const [contagem, setContagem] = useState(null);
     const jaContou = useRef(false);
     const [liberado, setLiberado] = useState(false);
+    const [naviosInimigos, setNaviosInimigos] = useState(new Set());
+    const [minasInimigas, setMinasInimigas] = useState(new Set());
 
     useEffect(() => {
         const c = conectarMinado(gameId, jogador,
@@ -78,6 +80,17 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
         setClient(c);
         return () => { c.deactivate(); };
     }, [gameId, jogador]);
+
+    useEffect(() => {
+        if (status !== 'FINALIZADA') return;
+        buscarPartidaMinada(gameId).then((p) => {
+            const souJogador1 = jogador === p.jogador1;
+            const navios = souJogador1 ? p.navios2 : p.navios1;
+            const minas = souJogador1 ? p.minas2 : p.minas1;
+            setNaviosInimigos(new Set((navios || []).map(([l, c]) => `${l}-${c}`)));
+            setMinasInimigas(new Set((minas || []).map(([l, c]) => `${l}-${c}`)));
+        });
+    }, [status]);
 
     useEffect(() => {
         if (contagem === null) return;
@@ -146,7 +159,11 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
                 const chave = `${l}-${c}`;
                 const resultado = meusTiros[chave];
                 const pista = pistas[chave];
-                const bg = corCelula(resultado, chave);
+                const revelaNavio = status === 'FINALIZADA' && !resultado && naviosInimigos.has(chave);
+                const revelaMina = status === 'FINALIZADA' && !resultado && minasInimigas.has(chave);
+                let bg = corCelula(resultado, chave);
+                if (revelaNavio) bg = '#2e8b57';
+                else if (revelaMina) bg = '#c0392b';
                 celulas.push(
                     <td
                         key={chave}
@@ -157,7 +174,9 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
                     >
                         {resultado === 'NAVIO' && '🚢'}
                         {resultado === 'MINA' && '💥'}
-                        {!resultado && bandeiras[chave] && '🚩'}
+                        {revelaNavio && '🚢'}
+                        {revelaMina && '💣'}
+                        {!resultado && !revelaNavio && !revelaMina && bandeiras[chave] && '🚩'}
                         {resultado !== 'NAVIO' && resultado !== 'MINA' && !bandeiras[chave] && pista && (
                             <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'calc(var(--celula) * 0.42)', lineHeight: 1, color: '#ffffff', fontWeight: 800, textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>
                                 💣{pista.minas}

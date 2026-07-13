@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { posicionarNavio, marcarPronto } from '../api/api';
 import { estiloNavio as estiloNavioBase } from '../utils/navios';
 
@@ -27,7 +27,7 @@ function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
     const [naviosColocados, setNaviosColocados] = useState([]);
     const [hover, setHover] = useState(null);
     const [mensagem, setMensagem] = useState('');
-
+    const enviando = useRef(false);
     const navioAtual = FROTA[indice];
     const acabou = indice >= FROTA.length;
 
@@ -46,7 +46,8 @@ function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
     }
 
     async function clicarCelula(linha, coluna) {
-        if (acabou) return;
+        if (acabou || enviando.current) return;
+        enviando.current = true;
         try {
             await posicionarNavio(gameId, { jogador, tipo: navioAtual.tipo, linha, coluna, direcao });
             const novas = [];
@@ -60,6 +61,8 @@ function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
             setMensagem('');
         } catch (e) {
             setMensagem(e.message);
+        } finally {
+            enviando.current = false;
         }
     }
 

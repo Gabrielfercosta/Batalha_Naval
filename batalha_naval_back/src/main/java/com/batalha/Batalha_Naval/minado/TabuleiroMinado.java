@@ -174,6 +174,16 @@ public class TabuleiroMinado {
         return true;
     }
 
+    public List<int[]> posicoesDe(EstadoCasa estado) {
+        List<int[]> lista = new ArrayList<>();
+        for (int l = 0; l < TAMANHO; l++) {
+            for (int c = 0; c < TAMANHO; c++) {
+                if (grade[l][c] == estado) lista.add(new int[]{l, c});
+            }
+        }
+        return lista;
+    }
+
     public List<int[]> casasReveladas() {
         List<int[]> lista = new ArrayList<>();
         for (int l = 0; l < TAMANHO; l++) {

@@ -20,6 +20,7 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
     const [status, setStatus] = useState('EM_ANDAMENTO');
     const [vencedor, setVencedor] = useState(null);
     const [mensagem, setMensagem] = useState('');
+    const [naviosInimigos, setNaviosInimigos] = useState([]);
 
     useEffect(() => {
         const c = conectar(
@@ -66,6 +67,14 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
             setVencedor(p.vencedor);
         });
     }, [gameId]);
+
+    useEffect(() => {
+        if (status !== 'FINALIZADA') return;
+        buscarPartida(gameId).then((p) => {
+            const souJogador1 = jogador === p.jogador1;
+            setNaviosInimigos((souJogador1 ? p.navios2 : p.navios1) || []);
+        });
+    }, [status]);
 
     function clicarInimigo(linha, coluna) {
         if (status !== 'EM_ANDAMENTO') return;
@@ -155,6 +164,9 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
             <div className="arena">
                 <div className="lago-grid lago-esquerdo">
                     {montarTabuleiro(meusTiros, true)}
+                    {status === 'FINALIZADA' && naviosInimigos.map((n, i) => (
+                        <img key={i} src={SPRITES[n.tipo]} style={{ ...estiloNavio(n.tamanho, n.linha, n.coluna, n.direcao), opacity: 0.8 }} />
+                    ))}
                 </div>
                 <div className="lago-grid lago-direito">
                     {montarTabuleiro(tirosInimigos, false)}

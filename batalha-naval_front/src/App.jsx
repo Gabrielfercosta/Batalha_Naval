@@ -10,7 +10,7 @@ import BatalhaMinada from './pages/BatalhaMinada';
 import Home from './pages/Home';
 import Loading from './pages/Loading';
 import { sairDaPartida, sairDaPartidaMinada } from './api/api';
-import { tocarMusica, retomar, alternarMudo, estaMudo } from './audio/musica';
+import { tocarMusica, retomar, alternarMudo, estaMudo, definirVolume, pegarVolume } from './audio/musica';
 
 function App() {
     const [tela, setTela] = useState('home');
@@ -23,6 +23,7 @@ function App() {
     const [modoAtual, setModoAtual] = useState('');
     const [mudo, setMudo] = useState(estaMudo());
     const [somAtivado, setSomAtivado] = useState(false);
+    const [volume, setVolume] = useState(pegarVolume());
 
     useEffect(() => {
         const tokenSalvo = localStorage.getItem('token');
@@ -106,9 +107,20 @@ function App() {
             {!somAtivado && (
                 <div className="dica-som">🔊 Clique para ativar o som</div>
             )}
-            <button className="btn-mudo" onClick={() => setMudo(alternarMudo())}>
-                {mudo ? '🔇' : '🔊'}
-            </button>
+            <div style={{ position: 'fixed', top: 12, left: 12, zIndex: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <button className="btn-mudo" style={{ position: 'static' }} onClick={() => setMudo(alternarMudo())}>
+                    {mudo ? '🔇' : '🔊'}
+                </button>
+                <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={volume}
+                    onChange={(e) => { const v = parseFloat(e.target.value); setVolume(v); definirVolume(v); }}
+                    style={{ width: 90, cursor: 'pointer', accentColor: 'var(--azul-ceu)' }}
+                />
+            </div>
             {tela !== 'batalha' && tela !== 'batalhaMinada' && tela !== 'loading' && tela !== 'home' && <img src="/titulo.png" alt="Batalha Naval" className="titulo-logo" />
             }
 

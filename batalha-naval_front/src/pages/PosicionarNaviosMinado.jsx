@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { posicionarNavioMinado } from '../api/api';
 import { estiloNavio as estiloNavioBase } from '../utils/navios';
+import { useEffect, useState, useRef } from 'react';
+
 
 const FROTA = [
     { tamanho: 5 },
@@ -54,7 +56,8 @@ function PosicionarNaviosMinado({ jogador, gameId, aoTerminar, aoVoltar }) {
     }
 
     async function clicarCelula(linha, coluna) {
-        if (acabou) return;
+        if (acabou || enviando.current) return;
+        enviando.current = true;
         try {
             await posicionarNavioMinado(gameId, { jogador, linha, coluna, tamanho: navioAtual.tamanho, direcao });
             const novas = [];
@@ -68,8 +71,11 @@ function PosicionarNaviosMinado({ jogador, gameId, aoTerminar, aoVoltar }) {
             setMensagem('');
         } catch (e) {
             setMensagem(e.message);
+        } finally {
+            enviando.current = false;
         }
     }
+
 
     const linhas = [];
     for (let l = 0; l < GRID; l++) {
