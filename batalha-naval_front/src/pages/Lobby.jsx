@@ -25,7 +25,7 @@ const TUTORIAIS = {
     }
 };
 
-function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada }) {
+function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada}) {
     const [salas, setSalas] = useState([]);
     const [nome, setNome] = useState('');
     const [senha, setSenha] = useState('');

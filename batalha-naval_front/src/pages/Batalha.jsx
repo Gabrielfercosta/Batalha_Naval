@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { conectar, atirar } from '../ws/socket';
 import { buscarPartida } from '../api/api';
 import { tocarMusica, tocarSom } from '../audio/musica';
-import { estiloNavio as estiloNavioBase } from '../utils/navios';
+import { estiloNavio as estiloNavioBase, ESPESSURA } from '../utils/navios';
 
 const SPRITES = {
     PORTA_AVIOES: '/navios/carrier.png',
@@ -10,6 +10,14 @@ const SPRITES = {
     CRUZADOR: '/navios/cruiser.png',
     SUBMARINO: '/navios/submarine.png',
     DESTROYER: '/navios/destroyer.png'
+};
+
+const DESTROCOS = {
+    PORTA_AVIOES: '/destrocos/carrier.png',
+    ENCOURACADO: '/destrocos/battleship.png',
+    CRUZADOR: '/destrocos/cruiser.png',
+    SUBMARINO: '/destrocos/submarine.png',
+    DESTROYER: '/destrocos/destroyer.png'
 };
 
 function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
@@ -21,6 +29,7 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
     const [vencedor, setVencedor] = useState(null);
     const [mensagem, setMensagem] = useState('');
     const [naviosInimigos, setNaviosInimigos] = useState([]);
+    const [afundadosInimigos, setAfundadosInimigos] = useState([]);
 
     useEffect(() => {
         const c = conectar(
@@ -36,6 +45,9 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
                     }
                     if (tiro.resultado === 'ACERTO' || tiro.resultado === 'AFUNDADO') {
                         tocarSom('explosao');
+                    }
+                    if (tiro.navioAfundado && tiro.autor === jogador) {
+                        setAfundadosInimigos((antigos) => [...antigos, tiro.navioAfundado]);
                     }
                 }
                 setTurno(tiro.turnoAtual);
@@ -127,15 +139,48 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
         return true;
     }
 
+    function estiloDestroco(navio) {
+        const horizontal = navio.direcao === 'HORIZONTAL';
+        const lado = navio.tamanho;
+        const leftCel = horizontal
+            ? navio.coluna
+            : navio.coluna + 0.5 - lado / 2;
+        const topCel = horizontal
+            ? navio.linha + 0.5 - lado / 2
+            : navio.linha;
+        return {
+            position: 'absolute',
+            width: `calc(var(--celula) * ${lado})`,
+            height: `calc(var(--celula) * ${lado})`,
+            left: `calc(var(--celula) * ${leftCel})`,
+            top: `calc(var(--celula) * ${topCel})`,
+            pointerEvents: 'none',
+            transform: horizontal ? 'rotate(90deg)' : 'none'
+        };
+    }
+
     function camadaNavios() {
-        return meusNavios.map((navio, i) => (
-            <img
-                key={i}
-                src={SPRITES[navio.tipo]}
-                className={navioAfundado(navio) ? 'navio-afundando' : ''}
-                style={estiloNavio(navio.tamanho, navio.linha, navio.coluna, navio.direcao)}
-            />
-        ));
+        return meusNavios.map((navio, i) => {
+            const afundado = navioAfundado(navio);
+            if (!afundado) {
+                return (
+                    <img
+                        key={i}
+                        src={SPRITES[navio.tipo]}
+                        style={estiloNavio(navio.tamanho, navio.linha, navio.coluna, navio.direcao)}
+                    />
+                );
+            }
+            return (
+                <div key={i} style={estiloDestroco(navio)}>
+                    <img
+                        src={DESTROCOS[navio.tipo]}
+                        className="destrocos"
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    />
+                </div>
+            );
+        });
     }
 
     const minhaVez = turno === jogador;
@@ -164,6 +209,15 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
             <div className="arena">
                 <div className="lago-grid lago-esquerdo">
                     {montarTabuleiro(meusTiros, true)}
+                    {afundadosInimigos.map((navio, i) => (
+                        <div key={i} style={estiloDestroco(navio)}>
+                            <img
+                                src={DESTROCOS[navio.tipo]}
+                                className="destrocos"
+                                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                            />
+                        </div>
+                    ))}
                     {status === 'FINALIZADA' && naviosInimigos.map((n, i) => (
                         <img key={i} src={SPRITES[n.tipo]} style={{ ...estiloNavio(n.tamanho, n.linha, n.coluna, n.direcao), opacity: 0.8 }} />
                     ))}
