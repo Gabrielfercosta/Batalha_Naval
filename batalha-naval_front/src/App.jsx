@@ -63,7 +63,7 @@ function App() {
         return () => window.removeEventListener('pointerdown', ativarSom);
     }, []);
 
-    function aoLogar(nome) { setJogador(nome); setTela('lobby'); }
+    <Cadastro aoLogar={aoLogar} irParaLogin={() => setTela('login')} />
 
     function sair() {
         if (gameId) {

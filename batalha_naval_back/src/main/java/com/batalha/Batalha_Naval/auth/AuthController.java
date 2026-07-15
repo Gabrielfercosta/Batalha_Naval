@@ -20,8 +20,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public Map<String, String> register(@RequestBody RegisterRequest request) {
-        authService.cadastrar(request.getUsername(), request.getSenha());
-        return Map.of("mensagem", "Usuário cadastrado com sucesso!");
+        String token = authService.cadastrar(request.getUsername(), request.getSenha());
+        return Map.of("token", token);
     }
 
     @PostMapping("/login")
