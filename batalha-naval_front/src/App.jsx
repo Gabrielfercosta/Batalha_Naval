@@ -63,7 +63,10 @@ function App() {
         return () => window.removeEventListener('pointerdown', ativarSom);
     }, []);
 
-    <Cadastro aoLogar={aoLogar} irParaLogin={() => setTela('login')} />
+    function aoLogar(nome) {
+        setJogador(nome);
+        setTela('lobby');
+    }
 
     function sair() {
         if (gameId) {
@@ -132,7 +135,7 @@ function App() {
                 <Login aoLogar={aoLogar} irParaCadastro={() => setTela('cadastro')} />
             )}
             {tela === 'cadastro' && (
-                <Cadastro irParaLogin={() => setTela('login')} />
+                <Cadastro aoLogar={aoLogar} irParaLogin={() => setTela('login')} />
             )}
             {tela === 'lobby' && (
                 <Lobby
