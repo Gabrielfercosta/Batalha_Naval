@@ -12,7 +12,8 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-
+import com.batalha.Batalha_Naval.dominio.Navio;
+import com.batalha.Batalha_Naval.dto.NavioRevelado;
 import java.security.Principal;
 
 @Controller
@@ -32,6 +33,14 @@ public class GameWebSocketController {
 
             Partida partida = gameService.buscarPartida(gameId);
 
+            NavioRevelado navioAfundado = null;
+            if (resultado == ResultadoTiro.AFUNDADO) {
+                Navio navio = partida.navioAfundadoEm(jogador, tiro);
+                if (navio != null) {
+                    navioAfundado = new NavioRevelado(navio);
+                }
+            }
+
             TiroResponse response = new TiroResponse(
                     jogador,
                     request.getLinha(),
@@ -39,7 +48,8 @@ public class GameWebSocketController {
                     resultado,
                     partida.getTurnoAtual(),
                     partida.getStatus(),
-                    partida.getVencedor()
+                    partida.getVencedor(),
+                    navioAfundado
             );
 
             messagingTemplate.convertAndSend("/topic/game/" + gameId, response);

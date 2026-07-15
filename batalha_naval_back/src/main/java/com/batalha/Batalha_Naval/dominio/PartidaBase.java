@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Getter
-public abstract class PartidaBase {
+public abstract class  PartidaBase {
 
     protected final String jogador1;
     protected String jogador2;
@@ -49,7 +49,14 @@ public abstract class PartidaBase {
 
     public abstract void marcarPronto(String jogador);
 
-    public abstract void removerJogador2();
+    public void removerJogador2() {
+        this.jogador2 = null;
+        this.prontos.clear();
+        if (this.status == StatusPartida.POSICIONANDO) {
+            this.status = StatusPartida.AGUARDANDO;
+            this.turnoAtual = this.jogador1;
+        }
+    }
 
     protected boolean ehJogador1(String jogador) {
         return jogador.equals(jogador1);

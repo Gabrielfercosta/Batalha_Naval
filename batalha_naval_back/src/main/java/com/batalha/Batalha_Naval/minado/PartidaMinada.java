@@ -65,14 +65,8 @@ public class PartidaMinada extends PartidaBase {
 
     @Override
     public void removerJogador2() {
-        this.jogador2 = null;
-        this.prontos.clear();
-        this.jaAtirou.clear();
+        super.removerJogador2();
         this.tabuleiro2.limpar();
-        if (this.status == StatusPartida.POSICIONANDO) {
-            this.status = StatusPartida.AGUARDANDO;
-            this.turnoAtual = this.jogador1;
-        }
     }
 
     public ResultadoTiroMinado atirar(String jogador, int linha, int coluna) {

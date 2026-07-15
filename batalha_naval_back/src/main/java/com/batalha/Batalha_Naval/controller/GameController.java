@@ -66,7 +66,8 @@ public class GameController {
                     null, -1, -1, null,
                     partida.getTurnoAtual(),
                     partida.getStatus(),
-                    partida.getVencedor()
+                    partida.getVencedor(),
+                    null
             );
             messagingTemplate.convertAndSend("/topic/game/" + gameId, inicio);
         }
@@ -82,7 +83,8 @@ public class GameController {
                     null, -1, -1, null,
                     partida.getTurnoAtual(),
                     partida.getStatus(),
-                    partida.getVencedor()
+                    partida.getVencedor(),
+                    null
             );
             messagingTemplate.convertAndSend("/topic/game/" + gameId, aviso);
         }

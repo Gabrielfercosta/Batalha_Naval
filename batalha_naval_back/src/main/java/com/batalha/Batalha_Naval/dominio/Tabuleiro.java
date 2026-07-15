@@ -17,8 +17,7 @@ public class Tabuleiro {
 
     public void posicionarNavio(Navio navio) {
         for (Coordenada pos : navio.getPosicoes()) {
-            if (pos.getLinha() < 0 || pos.getLinha() >= TAMANHO
-                    || pos.getColuna() < 0 || pos.getColuna() >= TAMANHO) {
+            if (pos.getLinha() < 0 || pos.getLinha() >= TAMANHO || pos.getColuna() < 0 || pos.getColuna() >= TAMANHO) {
                 throw new IllegalArgumentException(
                         "Navio fora do tabuleiro na posição " + pos);
             }
@@ -49,6 +48,15 @@ public class Tabuleiro {
             }
         }
         return ResultadoTiro.AGUA;
+    }
+
+    public Navio navioEm(Coordenada coordenada) {
+        for (Navio navio : navios) {
+            if (navio.ocupaPosicao(coordenada)) {
+                return navio;
+            }
+        }
+        return null;
     }
 
     public void limpar() {

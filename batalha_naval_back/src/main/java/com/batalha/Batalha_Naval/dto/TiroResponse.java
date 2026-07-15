@@ -15,4 +15,5 @@ public class TiroResponse {
     private final String turnoAtual;
     private final StatusPartida status;
     private final String vencedor;
+    private final NavioRevelado navioAfundado;
 }

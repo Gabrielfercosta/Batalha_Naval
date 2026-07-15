@@ -29,13 +29,13 @@ public class Partida extends PartidaBase {
 
     @Override
     public void removerJogador2() {
-        this.jogador2 = null;
-        this.prontos.clear();
+        super.removerJogador2();
         this.tabuleiro2.limpar();
-        if (this.status == StatusPartida.POSICIONANDO) {
-            this.status = StatusPartida.AGUARDANDO;
-            this.turnoAtual = this.jogador1;
-        }
+    }
+
+    public Navio navioAfundadoEm(String jogador, Coordenada tiro) {
+        Tabuleiro alvo = ehJogador1(jogador) ? tabuleiro2 : tabuleiro1;
+        return alvo.navioEm(tiro);
     }
 
     public ResultadoTiro atirar(String jogador, Coordenada tiro) {
