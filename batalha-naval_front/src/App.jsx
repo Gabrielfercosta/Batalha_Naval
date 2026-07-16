@@ -4,8 +4,7 @@ import Cadastro from './pages/Cadastro';
 import Lobby from './pages/Lobby';
 import Posicionar from './pages/Posicionar';
 import Batalha from './pages/Batalha';
-import PosicionarNaviosMinado from './pages/PosicionarNaviosMinado';
-import PosicionarMinasMinado from './pages/PosicionarMinasMinado';
+import PosicionarMinado from './pages/PosicionarMinado';
 import BatalhaMinada from './pages/BatalhaMinada';
 import Home from './pages/Home';
 import Loading from './pages/Loading';
@@ -17,7 +16,6 @@ function App() {
     const [jogador, setJogador] = useState('');
     const [gameId, setGameId] = useState('');
     const [meusNavios, setMeusNavios] = useState([]);
-    const [ocupadasMinado, setOcupadasMinado] = useState([]);
     const [minhasMinas, setMinhasMinas] = useState([]);
     const [destinoLoading, setDestinoLoading] = useState('');
     const [modoAtual, setModoAtual] = useState('');
@@ -45,7 +43,7 @@ function App() {
     }, []);
 
     useEffect(() => {
-        if (tela === 'posicionar' || tela === 'posicionarNaviosMinado' || tela === 'posicionarMinasMinado') {
+        if (tela === 'posicionar' || tela === 'posicionarMinado') {
             tocarMusica('posicionamento');
         } else if (tela === 'batalha' || tela === 'batalhaMinada') {
             tocarMusica('batalha');
@@ -100,7 +98,6 @@ function App() {
         localStorage.removeItem('modo');
         setGameId('');
         setMeusNavios([]);
-        setOcupadasMinado([]);
         setMinhasMinas([]);
         setModoAtual('');
         setTela('lobby');
@@ -141,7 +138,7 @@ function App() {
                 <Lobby
                     jogador={jogador}
                     aoIniciarPartida={(id) => entrarEmJogo(id, 'classico', 'posicionar')}
-                    aoIniciarMinada={(id) => entrarEmJogo(id, 'minada', 'posicionarNaviosMinado')}
+                    aoIniciarMinada={(id) => entrarEmJogo(id, 'minada', 'posicionarMinado')}
                 />
             )}
 
@@ -158,27 +155,17 @@ function App() {
                 <Batalha jogador={jogador} gameId={gameId} meusNavios={meusNavios} voltarLobby={voltarLobby} />
             )}
 
-            {tela === 'posicionarNaviosMinado' && (
-                <PosicionarNaviosMinado
+            {tela === 'posicionarMinado' && (
+                <PosicionarMinado
                     jogador={jogador}
                     gameId={gameId}
                     aoVoltar={voltarLobby}
-                    aoTerminar={(navios, ocupadas) => {
+                    aoComecar={(navios, minas) => {
                         setMeusNavios(navios);
-                        setOcupadasMinado(ocupadas);
-                        setTela('posicionarMinasMinado');
+                        setMinhasMinas(minas);
+                        setDestinoLoading('batalhaMinada');
+                        setTela('loading');
                     }}
-                />
-            )}
-
-            {tela === 'posicionarMinasMinado' && (
-                <PosicionarMinasMinado
-                    jogador={jogador}
-                    gameId={gameId}
-                    naviosColocados={meusNavios}
-                    ocupadas={ocupadasMinado}
-                    aoVoltar={voltarLobby}
-                    aoComecar={(minas) => { setMinhasMinas(minas); setDestinoLoading('batalhaMinada'); setTela('loading'); }}
                 />
             )}
 
