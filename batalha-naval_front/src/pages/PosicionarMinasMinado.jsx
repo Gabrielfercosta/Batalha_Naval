@@ -24,17 +24,18 @@ function PosicionarMinasMinado({ jogador, gameId, naviosColocados, ocupadas, aoC
         return estiloNavioBase(tamanho, linha, coluna, dir, (n) => n * CELULA);
     }
 
-    async function clicarCelula(linha, coluna) {
+    function clicarCelula(linha, coluna) {
         if (acabou) return;
         if (ocupadas.includes(`${linha}-${coluna}`)) { setMensagem('Já tem navio aqui.'); return; }
         if (minasColocadas.some(m => m.linha === linha && m.coluna === coluna)) { setMensagem('Já tem mina aqui.'); return; }
-        try {
-            await posicionarMinaMinado(gameId, { jogador, linha, coluna });
-            setMinasColocadas((atuais) => [...atuais, { linha, coluna }]);
-            setMensagem('');
-        } catch (e) {
+        const mina = { linha, coluna };
+        setMinasColocadas((atuais) => [...atuais, mina]);
+        setMensagem('');
+
+        posicionarMinaMinado(gameId, { jogador, linha, coluna }).catch((e) => {
+            setMinasColocadas((atuais) => atuais.filter((m) => m !== mina));
             setMensagem(e.message);
-        }
+        });
     }
 
     async function pronto() {

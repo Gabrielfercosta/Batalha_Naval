@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { posicionarNavioMinado } from '../api/api';
 import { estiloNavio as estiloNavioBase } from '../utils/navios';
 
@@ -27,7 +27,6 @@ function PosicionarNaviosMinado({ jogador, gameId, aoTerminar, aoVoltar }) {
     const [ocupadas, setOcupadas] = useState([]);
     const [hover, setHover] = useState(null);
     const [mensagem, setMensagem] = useState('');
-    const enviando = useRef(false);
     const navioAtual = FROTA[indice];
     const acabou = indice >= FROTA.length;
 
@@ -53,27 +52,31 @@ function PosicionarNaviosMinado({ jogador, gameId, aoTerminar, aoVoltar }) {
         return true;
     }
 
-    async function clicarCelula(linha, coluna) {
-        if (acabou || enviando.current) return;
-        enviando.current = true;
-        try {
-            await posicionarNavioMinado(gameId, { jogador, linha, coluna, tamanho: navioAtual.tamanho, direcao });
-            const novas = [];
-            for (let i = 0; i < navioAtual.tamanho; i++) {
-                if (direcao === 'HORIZONTAL') novas.push(`${linha}-${coluna + i}`);
-                else novas.push(`${linha + i}-${coluna}`);
-            }
-            setOcupadas((atuais) => [...atuais, ...novas]);
-            setNaviosColocados((atuais) => [...atuais, { tamanho: navioAtual.tamanho, linha, coluna, direcao }]);
-            setIndice((i) => i + 1);
-            setMensagem('');
-        } catch (e) {
-            setMensagem(e.message);
-        } finally {
-            enviando.current = false;
+    function clicarCelula(linha, coluna) {
+        if (acabou) return;
+        if (!previaValida(linha, coluna)) {
+            setMensagem('Não dá pra posicionar aí.');
+            return;
         }
-    }
+        const navio = navioAtual;
+        const novas = [];
+        for (let i = 0; i < navio.tamanho; i++) {
+            if (direcao === 'HORIZONTAL') novas.push(`${linha}-${coluna + i}`);
+            else novas.push(`${linha + i}-${coluna}`);
+        }
+        const registro = { tamanho: navio.tamanho, linha, coluna, direcao };
+        setOcupadas((atuais) => [...atuais, ...novas]);
+        setNaviosColocados((atuais) => [...atuais, registro]);
+        setIndice((i) => i + 1);
+        setMensagem('');
 
+        posicionarNavioMinado(gameId, { jogador, linha, coluna, tamanho: navio.tamanho, direcao }).catch((e) => {
+            setOcupadas((atuais) => atuais.filter((x) => !novas.includes(x)));
+            setNaviosColocados((atuais) => atuais.filter((n) => n !== registro));
+            setIndice((i) => i - 1);
+            setMensagem(e.message);
+        });
+    }
 
     const linhas = [];
     for (let l = 0; l < GRID; l++) {
