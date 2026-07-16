@@ -19,3 +19,18 @@ export function estiloNavio(tamanho, linha, coluna, dir, unidade) {
         transform: horizontal ? 'rotate(90deg)' : 'none'
     };
 }
+
+export const SPRITES_POR_TIPO = {
+    PORTA_AVIOES: '/navios/carrier.png',
+    ENCOURACADO: '/navios/battleship.png',
+    CRUZADOR: '/navios/cruiser.png',
+    SUBMARINO: '/navios/submarine.png',
+    DESTROYER: '/navios/destroyer.png'
+};
+
+export const SPRITES_POR_TAMANHO = {
+    5: '/navios/carrier.png',
+    4: '/navios/battleship.png',
+    3: '/navios/cruiser.png',
+    2: '/navios/destroyer.png'
+};
