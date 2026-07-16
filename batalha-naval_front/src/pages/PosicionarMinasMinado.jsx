@@ -1,21 +1,15 @@
 import { useState } from 'react';
 import { posicionarMinaMinado, marcarProntoMinado } from '../api/api';
-import { estiloNavio as estiloNavioBase } from '../utils/navios';
+import { estiloNavio as estiloNavioBase, SPRITES_POR_TAMANHO as SPRITES } from '../utils/navios';
 
 const CELULA = 28;
 const GRID = 16;
 const QTD_MINAS = 20;
 
-const SPRITES = {
-    5: '/navios/carrier.png',
-    4: '/navios/battleship.png',
-    3: '/navios/cruiser.png',
-    2: '/navios/destroyer.png'
-};
-
 function PosicionarMinasMinado({ jogador, gameId, naviosColocados, ocupadas, aoComecar, aoVoltar }) {
     const [minasColocadas, setMinasColocadas] = useState([]);
     const [mensagem, setMensagem] = useState('');
+    const [enviando, setEnviando] = useState(false);
 
     const faltam = QTD_MINAS - minasColocadas.length;
     const acabou = faltam <= 0;
@@ -25,33 +19,46 @@ function PosicionarMinasMinado({ jogador, gameId, naviosColocados, ocupadas, aoC
     }
 
     function clicarCelula(linha, coluna) {
-        if (acabou) return;
-        if (ocupadas.includes(`${linha}-${coluna}`)) { setMensagem('Já tem navio aqui.'); return; }
-        if (minasColocadas.some(m => m.linha === linha && m.coluna === coluna)) { setMensagem('Já tem mina aqui.'); return; }
-        const mina = { linha, coluna };
-        setMinasColocadas((atuais) => [...atuais, mina]);
+        const chave = `${linha}-${coluna}`;
+        if (ocupadas.includes(chave)) { setMensagem('Já tem navio aqui.'); return; }
+        const jaTem = minasColocadas.some((m) => m.linha === linha && m.coluna === coluna);
+        if (jaTem) {
+            setMinasColocadas((atuais) => atuais.filter((m) => !(m.linha === linha && m.coluna === coluna)));
+            setMensagem('');
+            return;
+        }
+        if (acabou) { setMensagem('Você já colocou todas as minas. Clique numa mina pra removê-la.'); return; }
+        setMinasColocadas((atuais) => [...atuais, { linha, coluna }]);
         setMensagem('');
-
-        posicionarMinaMinado(gameId, { jogador, linha, coluna }).catch((e) => {
-            setMinasColocadas((atuais) => atuais.filter((m) => m !== mina));
-            setMensagem(e.message);
-        });
     }
 
     async function pronto() {
+        if (enviando) return;
+        setEnviando(true);
+        setMensagem('');
         try {
+            for (const m of minasColocadas) {
+                try {
+                    await posicionarMinaMinado(gameId, { jogador, linha: m.linha, coluna: m.coluna });
+                } catch (e) {
+                    if (!String(e.message).includes('já posicionou')) throw e;
+                }
+            }
             await marcarProntoMinado(gameId, jogador);
             aoComecar(minasColocadas);
         } catch (e) {
             setMensagem(e.message);
+            setEnviando(false);
         }
     }
 
+    const minasSet = new Set(minasColocadas.map((m) => `${m.linha}-${m.coluna}`));
     const linhas = [];
     for (let l = 0; l < GRID; l++) {
         const celulas = [];
         for (let c = 0; c < GRID; c++) {
-            celulas.push(<td key={`${l}-${c}`} className="celula celula-min clicavel" onClick={() => clicarCelula(l, c)} />);
+            const temMina = minasSet.has(`${l}-${c}`);
+            celulas.push(<td key={`${l}-${c}`} className="celula celula-min clicavel" onClick={() => clicarCelula(l, c)} style={{ cursor: temMina ? 'pointer' : 'crosshair' }} />);
         }
         linhas.push(<tr key={l}>{celulas}</tr>);
     }
@@ -61,6 +68,7 @@ function PosicionarMinasMinado({ jogador, gameId, naviosColocados, ocupadas, aoC
             <button onClick={aoVoltar} style={{ position: 'absolute', top: 16, left: 16, margin: 0, padding: '6px 16px', fontSize: 14 }}>← Voltar</button>
             <h2>Posicione suas minas</h2>
             <p style={{ fontSize: 18 }}>Faltam: <b>{faltam}</b> 💣 (clique na água)</p>
+            <p style={{ fontSize: 13, margin: 0, color: '#9fb8d8' }}>Clique numa mina já colocada para removê-la.</p>
             {mensagem && <p style={{ color: 'var(--perigo)' }}>{mensagem}</p>}
 
             <div className="pos-board" style={{ position: 'relative', display: 'inline-block' }}>
@@ -71,7 +79,7 @@ function PosicionarMinasMinado({ jogador, gameId, naviosColocados, ocupadas, aoC
                 ))}
             </div>
 
-            {acabou && <button onClick={pronto}>Pronto</button>}
+            {acabou && <button onClick={pronto} disabled={enviando}>{enviando ? 'Iniciando...' : 'Pronto'}</button>}
         </div>
     );
 }

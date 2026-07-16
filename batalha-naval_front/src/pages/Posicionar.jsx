@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { posicionarNavio, marcarPronto } from '../api/api';
-import { estiloNavio as estiloNavioBase } from '../utils/navios';
+import { estiloNavio as estiloNavioBase, SPRITES_POR_TIPO as SPRITES } from '../utils/navios';
 
 const FROTA = [
     { tipo: 'PORTA_AVIOES', tamanho: 5 },
@@ -10,31 +10,43 @@ const FROTA = [
     { tipo: 'DESTROYER', tamanho: 2 }
 ];
 
-const SPRITES = {
-    PORTA_AVIOES: '/navios/carrier.png',
-    ENCOURACADO: '/navios/battleship.png',
-    CRUZADOR: '/navios/cruiser.png',
-    SUBMARINO: '/navios/submarine.png',
-    DESTROYER: '/navios/destroyer.png'
-};
-
 const CELULA = 40;
 
 function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
-    const [indice, setIndice] = useState(0);
     const [direcao, setDirecao] = useState('HORIZONTAL');
-    const [ocupadas, setOcupadas] = useState([]);
     const [naviosColocados, setNaviosColocados] = useState([]);
     const [hover, setHover] = useState(null);
     const [mensagem, setMensagem] = useState('');
-    const navioAtual = FROTA[indice];
-    const acabou = indice >= FROTA.length;
+    const [enviando, setEnviando] = useState(false);
+
+    const tiposColocados = naviosColocados.map((n) => n.tipo);
+    const navioAtual = FROTA.find((f) => !tiposColocados.includes(f.tipo));
+    const acabou = !navioAtual;
+
+    const ocupadas = [];
+    for (const n of naviosColocados) {
+        for (let i = 0; i < n.tamanho; i++) {
+            if (n.direcao === 'HORIZONTAL') ocupadas.push(`${n.linha}-${n.coluna + i}`);
+            else ocupadas.push(`${n.linha + i}-${n.coluna}`);
+        }
+    }
+
+    useEffect(() => {
+        function aoTeclar(e) {
+            if (e.key === 'r' || e.key === 'R') {
+                setDirecao((d) => (d === 'HORIZONTAL' ? 'VERTICAL' : 'HORIZONTAL'));
+            }
+        }
+        window.addEventListener('keydown', aoTeclar);
+        return () => window.removeEventListener('keydown', aoTeclar);
+    }, []);
 
     function estiloNavio(tamanho, linha, coluna, dir) {
         return estiloNavioBase(tamanho, linha, coluna, dir, (n) => n * CELULA);
     }
 
     function previaValida(linha, coluna) {
+        if (!navioAtual) return false;
         for (let i = 0; i < navioAtual.tamanho; i++) {
             const l = direcao === 'HORIZONTAL' ? linha : linha + i;
             const c = direcao === 'HORIZONTAL' ? coluna + i : coluna;
@@ -50,32 +62,32 @@ function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
             setMensagem('Não dá pra posicionar aí.');
             return;
         }
-        const navio = navioAtual;
-        const novas = [];
-        for (let i = 0; i < navio.tamanho; i++) {
-            if (direcao === 'HORIZONTAL') novas.push(`${linha}-${coluna + i}`);
-            else novas.push(`${linha + i}-${coluna}`);
-        }
-        setOcupadas((atuais) => [...atuais, ...novas]);
-        setNaviosColocados((atuais) => [...atuais, { tipo: navio.tipo, tamanho: navio.tamanho, linha, coluna, direcao }]);
-        setIndice((i) => i + 1);
+        setNaviosColocados((atuais) => [...atuais, { tipo: navioAtual.tipo, tamanho: navioAtual.tamanho, linha, coluna, direcao }]);
         setMensagem('');
-
-        posicionarNavio(gameId, { jogador, tipo: navio.tipo, linha, coluna, direcao }).catch((e) => {
-            setOcupadas((atuais) => atuais.filter((x) => !novas.includes(x)));
-            setNaviosColocados((atuais) => atuais.filter((n) => n.tipo !== navio.tipo));
-            setIndice((i) => i - 1);
-            setMensagem(e.message);
-        });
     }
 
+    function removerNavio(tipo) {
+        setNaviosColocados((atuais) => atuais.filter((n) => n.tipo !== tipo));
+        setMensagem('');
+    }
 
     async function comecar() {
+        if (enviando) return;
+        setEnviando(true);
+        setMensagem('');
         try {
+            for (const n of naviosColocados) {
+                try {
+                    await posicionarNavio(gameId, { jogador, tipo: n.tipo, linha: n.linha, coluna: n.coluna, direcao: n.direcao });
+                } catch (e) {
+                    if (!String(e.message).includes('já posicionou')) throw e;
+                }
+            }
             await marcarPronto(gameId, jogador);
             aoComecarBatalha(naviosColocados);
         } catch (e) {
             setMensagem(e.message);
+            setEnviando(false);
         }
     }
 
@@ -98,9 +110,10 @@ function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
             {acabou && <p style={{ fontSize: 18 }}>Frota completa!</p>}
 
             <button onClick={() => setDirecao(direcao === 'HORIZONTAL' ? 'VERTICAL' : 'HORIZONTAL')}>
-                Direção: {direcao}
+                Direção: {direcao} (ou tecle R)
             </button>
 
+            <p style={{ fontSize: 13, margin: 0, color: '#9fb8d8' }}>Clique num navio já colocado para removê-lo e reposicionar.</p>
             {mensagem && <p style={{ color: 'var(--perigo)' }}>{mensagem}</p>}
 
             <div className="pos-layout">
@@ -108,7 +121,13 @@ function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
                     <table className="tabuleiro"><tbody>{linhas}</tbody></table>
 
                     {naviosColocados.map((navio, i) => (
-                        <img key={i} src={SPRITES[navio.tipo]} style={estiloNavio(navio.tamanho, navio.linha, navio.coluna, navio.direcao)} />
+                        <img
+                            key={i}
+                            src={SPRITES[navio.tipo]}
+                            onClick={() => removerNavio(navio.tipo)}
+                            title="Clique para remover"
+                            style={{ ...estiloNavio(navio.tamanho, navio.linha, navio.coluna, navio.direcao), pointerEvents: 'auto', cursor: 'pointer' }}
+                        />
                     ))}
 
                     {!acabou && hover && (
@@ -134,7 +153,7 @@ function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
 
             {acabou && (
                 <div>
-                    <button onClick={comecar}>Pronto</button>
+                    <button onClick={comecar} disabled={enviando}>{enviando ? 'Iniciando...' : 'Pronto'}</button>
                 </div>
             )}
         </div>
