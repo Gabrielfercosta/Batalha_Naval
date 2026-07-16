@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { posicionarNavio, marcarPronto } from '../api/api';
 import { estiloNavio as estiloNavioBase } from '../utils/navios';
 
@@ -27,7 +27,6 @@ function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
     const [naviosColocados, setNaviosColocados] = useState([]);
     const [hover, setHover] = useState(null);
     const [mensagem, setMensagem] = useState('');
-    const enviando = useRef(false);
     const navioAtual = FROTA[indice];
     const acabou = indice >= FROTA.length;
 
@@ -45,26 +44,31 @@ function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
         return true;
     }
 
-    async function clicarCelula(linha, coluna) {
-        if (acabou || enviando.current) return;
-        enviando.current = true;
-        try {
-            await posicionarNavio(gameId, { jogador, tipo: navioAtual.tipo, linha, coluna, direcao });
-            const novas = [];
-            for (let i = 0; i < navioAtual.tamanho; i++) {
-                if (direcao === 'HORIZONTAL') novas.push(`${linha}-${coluna + i}`);
-                else novas.push(`${linha + i}-${coluna}`);
-            }
-            setOcupadas((atuais) => [...atuais, ...novas]);
-            setNaviosColocados((atuais) => [...atuais, { tipo: navioAtual.tipo, tamanho: navioAtual.tamanho, linha, coluna, direcao }]);
-            setIndice((i) => i + 1);
-            setMensagem('');
-        } catch (e) {
-            setMensagem(e.message);
-        } finally {
-            enviando.current = false;
+    function clicarCelula(linha, coluna) {
+        if (acabou) return;
+        if (!previaValida(linha, coluna)) {
+            setMensagem('Não dá pra posicionar aí.');
+            return;
         }
+        const navio = navioAtual;
+        const novas = [];
+        for (let i = 0; i < navio.tamanho; i++) {
+            if (direcao === 'HORIZONTAL') novas.push(`${linha}-${coluna + i}`);
+            else novas.push(`${linha + i}-${coluna}`);
+        }
+        setOcupadas((atuais) => [...atuais, ...novas]);
+        setNaviosColocados((atuais) => [...atuais, { tipo: navio.tipo, tamanho: navio.tamanho, linha, coluna, direcao }]);
+        setIndice((i) => i + 1);
+        setMensagem('');
+
+        posicionarNavio(gameId, { jogador, tipo: navio.tipo, linha, coluna, direcao }).catch((e) => {
+            setOcupadas((atuais) => atuais.filter((x) => !novas.includes(x)));
+            setNaviosColocados((atuais) => atuais.filter((n) => n.tipo !== navio.tipo));
+            setIndice((i) => i - 1);
+            setMensagem(e.message);
+        });
     }
+
 
     async function comecar() {
         try {

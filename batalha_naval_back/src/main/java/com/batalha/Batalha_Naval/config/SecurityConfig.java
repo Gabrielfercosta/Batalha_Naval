@@ -12,13 +12,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
+import org.springframework.beans.factory.annotation.Value;
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    @Value("${app.cors.origins:http://localhost:5173}")
+    private String corsOrigins;
 
     public SecurityConfig(JwtFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
@@ -46,7 +49,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("*"));
+        config.setAllowedOriginPatterns(Arrays.asList(corsOrigins.split("\\s*,\\s*")));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

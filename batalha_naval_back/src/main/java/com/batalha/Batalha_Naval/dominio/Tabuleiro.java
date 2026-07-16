@@ -16,6 +16,12 @@ public class Tabuleiro {
 
 
     public void posicionarNavio(Navio navio) {
+        for (Navio outro : navios) {
+            if (outro.getTipo() == navio.getTipo()) {
+                throw new IllegalArgumentException(
+                        "Você já posicionou um navio do tipo " + navio.getTipo() + ".");
+            }
+        }
         for (Coordenada pos : navio.getPosicoes()) {
             if (pos.getLinha() < 0 || pos.getLinha() >= TAMANHO || pos.getColuna() < 0 || pos.getColuna() >= TAMANHO) {
                 throw new IllegalArgumentException(

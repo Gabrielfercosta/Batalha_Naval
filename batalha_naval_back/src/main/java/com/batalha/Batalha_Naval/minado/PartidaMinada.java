@@ -35,11 +35,21 @@ public class PartidaMinada extends PartidaBase {
     }
 
     public void posicionarNavio(String jogador, int linha, int coluna, int tamanho, Direcao direcao) {
-        tabuleiroDoJogador(jogador).posicionarNavio(linha, coluna, tamanho, direcao);
+        TabuleiroMinado tab = tabuleiroDoJogador(jogador);
+        int totalCelulas = 0;
+        for (int t : TAMANHOS_NAVIOS) totalCelulas += t;
+        if (tab.contarNavios() + tamanho > totalCelulas) {
+            throw new IllegalStateException("Você já posicionou todos os navios.");
+        }
+        tab.posicionarNavio(linha, coluna, tamanho, direcao);
     }
 
     public void posicionarMina(String jogador, int linha, int coluna) {
-        tabuleiroDoJogador(jogador).posicionarMina(linha, coluna);
+        TabuleiroMinado tab = tabuleiroDoJogador(jogador);
+        if (tab.contarMinas() >= QTD_MINAS) {
+            throw new IllegalStateException("Você já posicionou todas as minas.");
+        }
+        tab.posicionarMina(linha, coluna);
     }
 
     @Override
