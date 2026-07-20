@@ -526,5 +526,5 @@
   { "categoria": "tv", "dificuldade": "easy", "pergunta": "Qual série documental da Netflix sobre crimes reais se tornou um fenômeno em 2015?", "correta": "Making a Murderer", "incorretas": ["Tiger King", "The Staircase", "Wild Wild Country"] },
   { "categoria": "animais", "dificuldade": "easy", "pergunta": "Qual é o maior peixe do mundo?", "correta": "Tubarão-baleia", "incorretas": ["Baleia-azul", "Tubarão-branco", "Arraia-manta"] },
   { "categoria": "animais", "dificuldade": "medium", "pergunta": "Qual animal muda de cor para se camuflar no ambiente?", "correta": "Camaleão", "incorretas": ["Lagarto", "Iguana", "Salamandra"] },
-  { "categoria": "animais", "dificuldade": "medium", "pergunta": "Qual é o único mamífero que põe ovos além do ornitorrinco?", "correta": "Equidna", "incorretas": ["Tatu", "Pangolim", "Castor"] },
+  { "categoria": "animais", "dificuldade": "medium", "pergunta": "Qual é o único mamífero que põe ovos além do ornitorrinco?", "correta": "Equidna", "incorretas": ["Tatu", "Pangolim", "Castor"] }
 ]
