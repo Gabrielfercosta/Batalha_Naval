@@ -13,6 +13,14 @@ async function pedir(url, metodo = 'GET', corpo, comAuth = true) {
 
     const res = await fetch(url, opcoes);
     if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('jogador');
+            localStorage.removeItem('gameId');
+            localStorage.removeItem('modo');
+            window.location.reload();
+            throw new Error('Sessão expirada. Faça login novamente.');
+        }
         const erro = await res.json().catch(() => ({}));
         throw new Error(erro.mensagem || 'Algo deu errado');
     }

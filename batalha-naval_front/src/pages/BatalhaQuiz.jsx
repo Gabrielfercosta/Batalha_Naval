@@ -194,7 +194,7 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
                             </button>
                         ))}
                     </div>
-                    {respondi && <p style={{ margin: '8px 0 0', color: '#bfe3ff' }}>Respondeu! Aguardando o adversário...</p>}
+                    {respondi && <p style={{ margin: '8px 0 0', color: '#ffffff', fontWeight: 600, textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>Respondeu! Aguardando o adversário...</p>}
                 </>
             );
         }
@@ -206,8 +206,8 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
                     <p style={{ margin: '6px 0 0' }}>
                         Você: <b>{placar.acertos[jogador] || 0}</b> acertos &nbsp;|&nbsp; {oponente || 'Oponente'}: <b>{placar.acertos[oponente] || 0}</b>
                     </p>
-                    <p style={{ margin: '4px 0 0', color: '#bfe3ff' }}>
-                        {podeAtirar
+                    <p style={{ margin: '4px 0 0', color: '#ffffff', fontWeight: 700, textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>
+                    {podeAtirar
                             ? '🎯 Sua vez de atirar! Clique no Mar Inimigo.'
                             : (proximoAtirador ? `${proximoAtirador} está atirando...` : 'Ninguém acertou. Próxima rodada...')}
                     </p>
