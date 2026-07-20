@@ -59,3 +59,40 @@ export function atirarMinado(client, gameId, jogador, linha, coluna) {
         body: JSON.stringify({ jogador, linha, coluna })
     });
 }
+
+export function conectarQuiz(gameId, jogador, aoReceberEvento, aoReceberErro) {
+    const token = localStorage.getItem('token');
+    const client = new Client({
+        webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/ws`),
+        connectHeaders: { Authorization: `Bearer ${token}` },
+        onConnect: () => {
+            client.subscribe(`/topic/quiz/${gameId}`, (msg) => {
+                aoReceberEvento(JSON.parse(msg.body));
+            });
+            client.subscribe(`/topic/quiz/${gameId}/erro/${jogador}`, (msg) => {
+                aoReceberErro(JSON.parse(msg.body));
+            });
+            client.publish({
+                destination: `/app/quiz/${gameId}/cheguei`,
+                body: JSON.stringify({ jogador })
+            });
+        }
+    });
+    client.activate();
+    return client;
+}
+
+export function responderQuiz(client, gameId, resposta) {
+    client.publish({
+        destination: `/app/quiz/${gameId}/responder`,
+        body: JSON.stringify({ resposta })
+    });
+}
+
+export function atirarQuiz(client, gameId, jogador, linha, coluna) {
+    client.publish({
+        destination: `/app/quiz/${gameId}/tiro`,
+        body: JSON.stringify({ jogador, linha, coluna })
+    });
+}
+

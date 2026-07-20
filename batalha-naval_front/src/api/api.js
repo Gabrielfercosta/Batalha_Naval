@@ -2,6 +2,7 @@ const API_HOST = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 const BASE = `${API_HOST}/api/game`;
 const AUTH_BASE = `${API_HOST}/api/auth`;
 const MINADO_BASE = `${API_HOST}/api/minado`;
+const QUIZ_BASE = `${API_HOST}/api/quiz`;
 
 async function pedir(url, metodo = 'GET', corpo, comAuth = true) {
     const headers = { 'Content-Type': 'application/json' };
@@ -85,4 +86,32 @@ export function marcarProntoMinado(gameId, jogador) {
 
 export function buscarPartidaMinada(gameId) {
     return pedir(`${MINADO_BASE}/${gameId}`);
+}
+
+export function criarPartidaQuiz(jogador, nome, senha, categorias, dificuldade) {
+    return pedir(`${QUIZ_BASE}/create`, 'POST', { jogador, nome, senha, categorias, dificuldade });
+}
+
+export function entrarPartidaQuiz(gameId, jogador, senha) {
+    return pedir(`${QUIZ_BASE}/${gameId}/join`, 'POST', { jogador, senha });
+}
+
+export function listarAbertasQuiz() {
+    return pedir(`${QUIZ_BASE}/open`);
+}
+
+export function posicionarNavioQuiz(gameId, dados) {
+    return pedir(`${QUIZ_BASE}/${gameId}/posicionar`, 'POST', dados);
+}
+
+export function marcarProntoQuiz(gameId, jogador) {
+    return pedir(`${QUIZ_BASE}/${gameId}/pronto`, 'POST', { jogador });
+}
+
+export function buscarPartidaQuiz(gameId) {
+    return pedir(`${QUIZ_BASE}/${gameId}`);
+}
+
+export function sairDaPartidaQuiz(gameId, jogador) {
+    return pedir(`${QUIZ_BASE}/${gameId}/sair`, 'POST', { jogador });
 }

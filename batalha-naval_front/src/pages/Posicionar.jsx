@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { posicionarNavio, marcarPronto } from '../api/api';
+import { posicionarNavio as posicionarClassico, marcarPronto as prontoClassico } from '../api/api';
 import { estiloNavio as estiloNavioBase, SPRITES_POR_TIPO as SPRITES } from '../utils/navios';
 
 const FROTA = [
@@ -12,7 +12,7 @@ const FROTA = [
 
 const CELULA = 40;
 
-function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
+function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar, apiPosicionar = posicionarClassico, apiPronto = prontoClassico }) {
     const [direcao, setDirecao] = useState('HORIZONTAL');
     const [naviosColocados, setNaviosColocados] = useState([]);
     const [hover, setHover] = useState(null);
@@ -78,12 +78,12 @@ function Posicionar({ jogador, gameId, aoComecarBatalha, aoVoltar }) {
         try {
             for (const n of naviosColocados) {
                 try {
-                    await posicionarNavio(gameId, { jogador, tipo: n.tipo, linha: n.linha, coluna: n.coluna, direcao: n.direcao });
+                    await apiPosicionar(gameId, { jogador, tipo: n.tipo, linha: n.linha, coluna: n.coluna, direcao: n.direcao });
                 } catch (e) {
                     if (!String(e.message).includes('já posicionou')) throw e;
                 }
             }
-            await marcarPronto(gameId, jogador);
+            await apiPronto(gameId, jogador);
             aoComecarBatalha(naviosColocados);
         } catch (e) {
             setMensagem(e.message);

@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
-import { criarPartida, listarAbertas, entrarPartida, criarPartidaMinada, listarAbertasMinada, entrarPartidaMinada } from '../api/api';
+import {
+    criarPartida, listarAbertas, entrarPartida,
+    criarPartidaMinada, listarAbertasMinada, entrarPartidaMinada,
+    criarPartidaQuiz, listarAbertasQuiz, entrarPartidaQuiz
+} from '../api/api';
 
 const TUTORIAIS = {
     classico: {
@@ -22,10 +26,55 @@ const TUTORIAIS = {
             'Achou todos os navios inimigos? Você vence. Mas se acertar uma mina, você perde!',
             'Dica: o seu primeiro tiro é sempre seguro, nunca explode.'
         ]
+    },
+    quiz: {
+        titulo: '🧠 Batalha Naval Quiz',
+        passos: [
+            '🎯 Objetivo: afundar toda a frota inimiga respondendo perguntas!',
+            'Posicione seus 5 navios (igual ao clássico).',
+            'Cada rodada tem 5 perguntas — os dois respondem ao mesmo tempo, com tempo limitado.',
+            'Você vê se o adversário acertou cada pergunta.',
+            'No fim das 5, cada acerto vale 1 tiro. Quem acertou mais atira primeiro!',
+            'Dá pra escolher as categorias e a dificuldade ao criar a sala.'
+        ]
     }
 };
 
-function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada}) {
+const CATEGORIAS = [
+    { id: 'geral', nome: 'Geral' },
+    { id: 'livros', nome: 'Livros' },
+    { id: 'filmes', nome: 'Filmes' },
+    { id: 'musicas', nome: 'Músicas' },
+    { id: 'teatro', nome: 'Teatro' },
+    { id: 'tv', nome: 'TV' },
+    { id: 'videogame', nome: 'Videogame' },
+    { id: 'tabuleiro', nome: 'Tabuleiro' },
+    { id: 'ciencia', nome: 'Ciência' },
+    { id: 'computadores', nome: 'Computadores' },
+    { id: 'matematica', nome: 'Matemática' },
+    { id: 'mitologia', nome: 'Mitologia' },
+    { id: 'esportes', nome: 'Esportes' },
+    { id: 'geografia', nome: 'Geografia' },
+    { id: 'historia', nome: 'História' },
+    { id: 'politica', nome: 'Política' },
+    { id: 'arte', nome: 'Arte' },
+    { id: 'celebridades', nome: 'Celebridades' },
+    { id: 'animais', nome: 'Animais' },
+    { id: 'veiculos', nome: 'Veículos' },
+    { id: 'quadrinhos', nome: 'Quadrinhos' },
+    { id: 'dispositivos', nome: 'Dispositivos' },
+    { id: 'anime', nome: 'Anime' },
+    { id: 'cartoons', nome: 'Cartoons' }
+];
+
+const DIFICULDADES = [
+    { v: 'todas', nome: 'Todas' },
+    { v: 'easy', nome: 'Fácil' },
+    { v: 'medium', nome: 'Médio' },
+    { v: 'hard', nome: 'Difícil' }
+];
+
+function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada, aoIniciarQuiz }) {
     const [salas, setSalas] = useState([]);
     const [nome, setNome] = useState('');
     const [senha, setSenha] = useState('');
@@ -34,13 +83,37 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada}) {
     const [ajuda, setAjuda] = useState(null);
     const [salaComSenha, setSalaComSenha] = useState(null);
     const [senhaDigitada, setSenhaDigitada] = useState('');
+    const [categoriasAtivas, setCategoriasAtivas] = useState(() => new Set(CATEGORIAS.map((c) => c.id)));
+    const [dificuldade, setDificuldade] = useState('todas');
+
+    function toggleCategoria(id) {
+        setCategoriasAtivas((prev) => {
+            const nova = new Set(prev);
+            if (nova.has(id)) nova.delete(id);
+            else nova.add(id);
+            return nova;
+        });
+    }
+
+    const apiPorModo = {
+        classico: { criar: criarPartida, entrar: entrarPartida, iniciar: aoIniciarPartida },
+        minada: { criar: criarPartidaMinada, entrar: entrarPartidaMinada, iniciar: aoIniciarMinada },
+        quiz: { criar: criarPartidaQuiz, entrar: entrarPartidaQuiz, iniciar: aoIniciarQuiz }
+    };
+
+    const iconePorModo = { classico: '🚢', minada: '💣', quiz: '🧠' };
 
     async function carregarSalas() {
-        const classicas = await listarAbertas();
-        const minadas = await listarAbertasMinada();
-        const todasClassicas = classicas.map(s => ({ ...s, modo: 'classico' }));
-        const todasMinadas = minadas.map(s => ({ ...s, modo: 'minada' }));
-        setSalas([...todasClassicas, ...todasMinadas]);
+        const [classicas, minadas, quizes] = await Promise.all([
+            listarAbertas(),
+            listarAbertasMinada(),
+            listarAbertasQuiz()
+        ]);
+        setSalas([
+            ...classicas.map((s) => ({ ...s, modo: 'classico' })),
+            ...minadas.map((s) => ({ ...s, modo: 'minada' })),
+            ...quizes.map((s) => ({ ...s, modo: 'quiz' }))
+        ]);
     }
 
     useEffect(() => {
@@ -52,12 +125,15 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada}) {
     async function criar() {
         if (nome.trim() === '') { setMensagem('Dê um nome pra sala.'); return; }
         try {
-            if (modo === 'classico') {
-                const p = await criarPartida(jogador, nome, senha);
-                aoIniciarPartida(p.gameId);
+            if (modo === 'quiz') {
+                const cats = Array.from(categoriasAtivas);
+                if (cats.length === 0) { setMensagem('Escolha ao menos 1 categoria.'); return; }
+                const p = await criarPartidaQuiz(jogador, nome, senha, cats, dificuldade === 'todas' ? '' : dificuldade);
+                aoIniciarQuiz(p.gameId);
             } else {
-                const p = await criarPartidaMinada(jogador, nome, senha);
-                aoIniciarMinada(p.gameId);
+                const api = apiPorModo[modo];
+                const p = await api.criar(jogador, nome, senha);
+                api.iniciar(p.gameId);
             }
         } catch (e) { setMensagem(e.message); }
     }
@@ -69,26 +145,18 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada}) {
             return;
         }
         try {
-            if (sala.modo === 'classico') {
-                await entrarPartida(sala.gameId, jogador, '');
-                aoIniciarPartida(sala.gameId);
-            } else {
-                await entrarPartidaMinada(sala.gameId, jogador, '');
-                aoIniciarMinada(sala.gameId);
-            }
+            const api = apiPorModo[sala.modo];
+            await api.entrar(sala.gameId, jogador, '');
+            api.iniciar(sala.gameId);
         } catch (e) { setMensagem(e.message); }
     }
 
     async function confirmarSenha() {
         if (!salaComSenha) return;
         try {
-            if (salaComSenha.modo === 'classico') {
-                await entrarPartida(salaComSenha.gameId, jogador, senhaDigitada);
-                aoIniciarPartida(salaComSenha.gameId);
-            } else {
-                await entrarPartidaMinada(salaComSenha.gameId, jogador, senhaDigitada);
-                aoIniciarMinada(salaComSenha.gameId);
-            }
+            const api = apiPorModo[salaComSenha.modo];
+            await api.entrar(salaComSenha.gameId, jogador, senhaDigitada);
+            api.iniciar(salaComSenha.gameId);
             setSalaComSenha(null);
         } catch (e) {
             setMensagem(e.message);
@@ -109,10 +177,36 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada}) {
                     💣 Minada
                     <span className="badge-ajuda" onClick={(e) => { e.stopPropagation(); setAjuda('minada'); }}>?</span>
                 </button>
+                <button onClick={() => setModo('quiz')} style={{ position: 'relative', opacity: modo === 'quiz' ? 1 : 0.5 }}>
+                    🧠 Quiz
+                    <span className="badge-ajuda" onClick={(e) => { e.stopPropagation(); setAjuda('quiz'); }}>?</span>
+                </button>
             </div>
 
             <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome da sala" />
             <input value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Senha (opcional)" />
+
+            {modo === 'quiz' && (
+                <div style={{ width: '100%' }}>
+                    <p style={{ margin: '4px 0', fontSize: 14 }}>Categorias <span style={{ opacity: 0.6, fontSize: 12 }}>(clique pra desativar)</span></p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
+                        {CATEGORIAS.map((c) => (
+                            <button key={c.id} onClick={() => toggleCategoria(c.id)} style={{ fontSize: 12, padding: '4px 8px', margin: 0, opacity: categoriasAtivas.has(c.id) ? 1 : 0.35 }}>
+                                {c.nome}
+                            </button>
+                        ))}
+                    </div>
+                    <p style={{ margin: '10px 0 4px', fontSize: 14 }}>Dificuldade</p>
+                    <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
+                        {DIFICULDADES.map((d) => (
+                            <button key={d.v} onClick={() => setDificuldade(d.v)} style={{ opacity: dificuldade === d.v ? 1 : 0.4 }}>
+                                {d.nome}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <div>
                 <button onClick={criar}>Criar sala</button>
                 <button onClick={carregarSalas}>Atualizar</button>
@@ -125,7 +219,7 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada}) {
             <ul className="lista-salas">
                 {salas.map((sala) => (
                     <li key={sala.gameId} className="sala-item">
-                        <span>{sala.modo === 'minada' ? '💣' : '🚢'} {sala.temSenha ? '🔒 ' : ''}{sala.nome} <span style={{ fontSize: 12, opacity: 0.7 }}>({sala.criador} · {sala.jogadores}/2)</span></span>
+                        <span>{iconePorModo[sala.modo]} {sala.temSenha ? '🔒 ' : ''}{sala.nome} <span style={{ fontSize: 12, opacity: 0.7 }}>({sala.criador} · {sala.jogadores}/2)</span></span>
                         <button onClick={() => entrar(sala)}>Entrar</button>
                     </li>
                 ))}

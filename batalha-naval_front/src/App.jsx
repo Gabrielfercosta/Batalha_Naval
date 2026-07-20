@@ -6,9 +6,10 @@ import Posicionar from './pages/Posicionar';
 import Batalha from './pages/Batalha';
 import PosicionarMinado from './pages/PosicionarMinado';
 import BatalhaMinada from './pages/BatalhaMinada';
+import BatalhaQuiz from './pages/BatalhaQuiz';
 import Home from './pages/Home';
 import Loading from './pages/Loading';
-import { sairDaPartida, sairDaPartidaMinada } from './api/api';
+import { sairDaPartida, sairDaPartidaMinada, sairDaPartidaQuiz, posicionarNavioQuiz, marcarProntoQuiz } from './api/api';
 import { tocarMusica, retomar, alternarMudo, estaMudo, definirVolume, pegarVolume } from './audio/musica';
 
 function App() {
@@ -24,6 +25,12 @@ function App() {
     const [volume, setVolume] = useState(pegarVolume());
     const [mostrarVolume, setMostrarVolume] = useState(false);
 
+    function sairDoBackend(modo, id, jog) {
+        if (modo === 'minada') return sairDaPartidaMinada(id, jog);
+        if (modo === 'quiz') return sairDaPartidaQuiz(id, jog);
+        return sairDaPartida(id, jog);
+    }
+
     useEffect(() => {
         const tokenSalvo = localStorage.getItem('token');
         const jogadorSalvo = localStorage.getItem('jogador');
@@ -34,8 +41,7 @@ function App() {
             const gameSalvo = localStorage.getItem('gameId');
             const modoSalvo = localStorage.getItem('modo');
             if (gameSalvo) {
-                if (modoSalvo === 'minada') sairDaPartidaMinada(gameSalvo, jogadorSalvo).catch(() => {});
-                else sairDaPartida(gameSalvo, jogadorSalvo).catch(() => {});
+                sairDoBackend(modoSalvo, gameSalvo, jogadorSalvo).catch(() => {});
                 localStorage.removeItem('gameId');
                 localStorage.removeItem('modo');
             }
@@ -43,9 +49,9 @@ function App() {
     }, []);
 
     useEffect(() => {
-        if (tela === 'posicionar' || tela === 'posicionarMinado') {
+        if (tela === 'posicionar' || tela === 'posicionarMinado' || tela === 'posicionarQuiz') {
             tocarMusica('posicionamento');
-        } else if (tela === 'batalha' || tela === 'batalhaMinada') {
+        } else if (tela === 'batalha' || tela === 'batalhaMinada' || tela === 'batalhaQuiz') {
             tocarMusica('batalha');
         } else if (tela === 'login' || tela === 'cadastro' || tela === 'home' || tela === 'lobby') {
             tocarMusica('inicial');
@@ -68,8 +74,7 @@ function App() {
 
     function sair() {
         if (gameId) {
-            if (modoAtual === 'minada') sairDaPartidaMinada(gameId, jogador).catch(() => {});
-            else sairDaPartida(gameId, jogador).catch(() => {});
+            sairDoBackend(modoAtual, gameId, jogador).catch(() => {});
         }
         localStorage.removeItem('token');
         localStorage.removeItem('jogador');
@@ -91,8 +96,7 @@ function App() {
 
     function voltarLobby() {
         if (gameId) {
-            if (modoAtual === 'minada') sairDaPartidaMinada(gameId, jogador).catch(() => {});
-            else sairDaPartida(gameId, jogador).catch(() => {});
+            sairDoBackend(modoAtual, gameId, jogador).catch(() => {});
         }
         localStorage.removeItem('gameId');
         localStorage.removeItem('modo');
@@ -116,7 +120,7 @@ function App() {
                     <input type="range" min="0" max="1" step="0.05" value={volume} onChange={(e) => { const v = parseFloat(e.target.value); setVolume(v); definirVolume(v); }} className="slider-volume"/>
                 )}
             </div>
-            {tela !== 'batalha' && tela !== 'batalhaMinada' && tela !== 'loading' && tela !== 'home' && <img src="/titulo.png" alt="Batalha Naval" className="titulo-logo" />
+            {tela !== 'batalha' && tela !== 'batalhaMinada' && tela !== 'batalhaQuiz' && tela !== 'loading' && tela !== 'home' && <img src="/titulo.png" alt="Batalha Naval" className="titulo-logo" />
             }
 
             {jogador && (
@@ -139,6 +143,7 @@ function App() {
                     jogador={jogador}
                     aoIniciarPartida={(id) => entrarEmJogo(id, 'classico', 'posicionar')}
                     aoIniciarMinada={(id) => entrarEmJogo(id, 'minada', 'posicionarMinado')}
+                    aoIniciarQuiz={(id) => entrarEmJogo(id, 'quiz', 'posicionarQuiz')}
                 />
             )}
 
@@ -153,6 +158,21 @@ function App() {
 
             {tela === 'batalha' && (
                 <Batalha jogador={jogador} gameId={gameId} meusNavios={meusNavios} voltarLobby={voltarLobby} />
+            )}
+
+            {tela === 'posicionarQuiz' && (
+                <Posicionar
+                    jogador={jogador}
+                    gameId={gameId}
+                    aoVoltar={voltarLobby}
+                    apiPosicionar={posicionarNavioQuiz}
+                    apiPronto={marcarProntoQuiz}
+                    aoComecarBatalha={(navios) => { setMeusNavios(navios); setDestinoLoading('batalhaQuiz'); setTela('loading'); }}
+                />
+            )}
+
+            {tela === 'batalhaQuiz' && (
+                <BatalhaQuiz jogador={jogador} gameId={gameId} meusNavios={meusNavios} voltarLobby={voltarLobby} />
             )}
 
             {tela === 'posicionarMinado' && (
