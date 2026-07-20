@@ -36,7 +36,7 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
                     setMensagem('');
                     setStatus('EM_ANDAMENTO');
                 } else if (ev.tipo === 'PERGUNTA') {
-                    setPergunta({ texto: ev.pergunta, opcoes: ev.opcoes, indice: ev.indice, total: ev.total });
+                    setPergunta({ texto: ev.pergunta, opcoes: ev.opcoes, indice: ev.indice, total: ev.total, dificuldade: ev.dificuldade });
                     setResultado(null);
                     setPlacar(null);
                     setRespondi(false);
@@ -177,19 +177,19 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
             );
         }
         if (pergunta) {
+            const valorTiro = pergunta.dificuldade === 'hard' ? 2 : 1;
+            const labelDif = pergunta.dificuldade === 'hard' ? '·· Difícil — vale 2 tiros!' : pergunta.dificuldade === 'medium' ? '· Médio' : '🌟 Fácil';
             return (
                 <>
-                    <div style={{ fontSize: 14, opacity: 0.8 }}>Pergunta {pergunta.indice}/{pergunta.total}</div>
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: 13, opacity: 0.85 }}>Pergunta {pergunta.indice}/{pergunta.total}</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: valorTiro === 2 ? '#ffd700' : '#ffffff', textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>{labelDif}</span>
+                    </div>
                     <div style={{ fontSize: 22, fontWeight: 800 }}>⏱️ {segundos}s</div>
                     <h3 style={{ margin: '6px 0' }}>{pergunta.texto}</h3>
                     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
                         {pergunta.opcoes.map((op) => (
-                            <button
-                                key={op}
-                                onClick={() => responder(op)}
-                                disabled={respondi}
-                                style={{ opacity: respondi && escolhida !== op ? 0.5 : 1, fontWeight: escolhida === op ? 800 : 400 }}
-                            >
+                            <button key={op} onClick={() => responder(op)} disabled={respondi} style={{ opacity: respondi && escolhida !== op ? 0.5 : 1, fontWeight: escolhida === op ? 800 : 400 }}>
                                 {op}
                             </button>
                         ))}

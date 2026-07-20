@@ -96,7 +96,8 @@ public class PartidaQuiz extends PartidaBase {
         boolean acertou = perguntaAtual.estaCorreta(resposta);
         acertouPergunta.put(jogador, acertou);
         if (acertou) {
-            acertosRodada.merge(jogador, 1, Integer::sum);
+            int valor = "hard".equals(perguntaAtual.getDificuldade()) ? 2 : 1;
+            acertosRodada.merge(jogador, valor, Integer::sum);
         }
         return todosResponderam();
     }

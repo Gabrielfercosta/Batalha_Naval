@@ -49,7 +49,7 @@ public class TriviaService {
         opcoes.add(p.correta);
         opcoes.addAll(p.incorretas);
         Collections.shuffle(opcoes);
-        return new PerguntaTrivia(p.pergunta, opcoes, p.correta);
+        return new PerguntaTrivia(p.pergunta, opcoes, p.correta, p.dificuldade);
     }
 
     static class PerguntaBanco {

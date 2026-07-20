@@ -154,7 +154,8 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
 
         PerguntaResponse resposta = new PerguntaResponse(
                 pergunta.getPergunta(), pergunta.getOpcoes(), SEGUNDOS_RESPOSTA,
-                partida.getPerguntaIndice() + 1, PartidaQuiz.PERGUNTAS_POR_RODADA);
+                partida.getPerguntaIndice() + 1, PartidaQuiz.PERGUNTAS_POR_RODADA,
+                pergunta.getDificuldade());
         messaging.convertAndSend("/topic/quiz/" + gameId, resposta);
 
         agendarTimer(gameId);
