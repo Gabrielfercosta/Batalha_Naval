@@ -51,6 +51,15 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
         return gameId;
     }
 
+    @Override
+    public PartidaQuiz sairDaPartida(String gameId, String jogador) {
+        PartidaQuiz partida = super.sairDaPartida(gameId, jogador);
+        if (partida != null && partida.getStatus() == StatusPartida.FINALIZADA) {
+            limpar(gameId);
+        }
+        return partida;
+    }
+
     public void posicionarNavio(String gameId, String jogador, TipoNavio tipo, int linha, int coluna, Direcao direcao) {
         PartidaQuiz partida = buscarPartida(gameId);
         Navio navio = FabricaNavio.criar(tipo, linha, coluna, direcao);

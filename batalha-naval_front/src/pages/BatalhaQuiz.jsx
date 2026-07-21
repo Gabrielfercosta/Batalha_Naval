@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { conectarQuiz, responderQuiz, atirarQuiz } from '../ws/socket';
 import { buscarPartidaQuiz } from '../api/api';
 import { tocarSom, tocarMusica } from '../audio/musica';
@@ -20,12 +20,14 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
     const [proximoAtirador, setProximoAtirador] = useState(null);
     const [segundos, setSegundos] = useState(null);
     const [naviosInimigos, setNaviosInimigos] = useState([]);
+    const finalizadoRef = useRef(false);
 
     useEffect(() => {
         const c = conectarQuiz(
             gameId,
             jogador,
             (ev) => {
+                if (finalizadoRef.current) return;
                 if (ev.tipo === 'CONTAGEM') {
                     setContagem(ev.segundos);
                     setPergunta(null);
@@ -66,6 +68,7 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
                         }
                     }
                     setProximoAtirador(ev.proximoAtirador);
+                    if (ev.status === 'FINALIZADA') finalizadoRef.current = true;
                     setStatus(ev.status);
                     setVencedor(ev.vencedor);
                 } else if (ev.tipo === 'ERRO') {
