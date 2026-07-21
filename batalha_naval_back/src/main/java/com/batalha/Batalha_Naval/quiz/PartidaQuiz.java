@@ -85,11 +85,8 @@ public class PartidaQuiz extends PartidaBase {
     }
 
     public boolean responder(String jogador, String resposta) {
-        if (status != StatusPartida.EM_ANDAMENTO) {
-            throw new IllegalStateException("A partida não está em andamento.");
-        }
-        if (faseTiros || perguntaAtual == null || resolvida) {
-            throw new IllegalStateException("Não há pergunta ativa para responder.");
+        if (status != StatusPartida.EM_ANDAMENTO || faseTiros || perguntaAtual == null || resolvida) {
+            return false;
         }
         if (responderam.contains(jogador)) {
             return todosResponderam();

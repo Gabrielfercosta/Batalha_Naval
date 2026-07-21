@@ -43,6 +43,7 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
                     setEscolhida(null);
                     setSegundos(ev.segundos);
                     setContagem(null);
+                    setMensagem('');
                     setStatus('EM_ANDAMENTO');
                 } else if (ev.tipo === 'RESULTADO') {
                     setResultado({ respostaCorreta: ev.respostaCorreta, acertos: ev.acertos });
