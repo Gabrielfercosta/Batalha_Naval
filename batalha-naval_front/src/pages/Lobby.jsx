@@ -86,6 +86,7 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada, aoIniciarQuiz }) {
     const [categoriasAtivas, setCategoriasAtivas] = useState(() => new Set(CATEGORIAS.map((c) => c.id)));
     const [dificuldade, setDificuldade] = useState('todas');
     const [modoRapido, setModoRapido] = useState(false);
+    const [criando, setCriando] = useState(false);
 
     function toggleCategoria(id) {
         setCategoriasAtivas((prev) => {
@@ -124,11 +125,13 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada, aoIniciarQuiz }) {
     }, []);
 
     async function criar() {
+        if (criando) return;
         if (nome.trim() === '') { setMensagem('Dê um nome pra sala.'); return; }
+        if (modo === 'quiz' && categoriasAtivas.size === 0) { setMensagem('Escolha ao menos 1 categoria.'); return; }
+        setCriando(true);
         try {
             if (modo === 'quiz') {
                 const cats = Array.from(categoriasAtivas);
-                if (cats.length === 0) { setMensagem('Escolha ao menos 1 categoria.'); return; }
                 const p = await criarPartidaQuiz(jogador, nome, senha, cats, dificuldade === 'todas' ? '' : dificuldade, modoRapido);
                 aoIniciarQuiz(p.gameId);
             } else {
@@ -136,7 +139,10 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada, aoIniciarQuiz }) {
                 const p = await api.criar(jogador, nome, senha);
                 api.iniciar(p.gameId);
             }
-        } catch (e) { setMensagem(e.message); }
+        } catch (e) {
+            setMensagem(e.message);
+            setCriando(false);
+        }
     }
 
     async function entrar(sala) {
@@ -213,7 +219,7 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada, aoIniciarQuiz }) {
             )}
 
             <div>
-                <button onClick={criar}>Criar sala</button>
+                <button onClick={criar} disabled={criando}>{criando ? 'Criando...' : 'Criar sala'}</button>
                 <button onClick={carregarSalas}>Atualizar</button>
             </div>
 
