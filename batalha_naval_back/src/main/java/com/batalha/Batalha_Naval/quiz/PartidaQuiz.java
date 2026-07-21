@@ -32,15 +32,17 @@ public class PartidaQuiz extends PartidaBase {
     private final List<String> ordemTiro = new ArrayList<>();
     private List<String> categorias = new ArrayList<>();
     private String dificuldade = "";
+    private boolean modoRapido = false;
     private final Set<String> perguntasUsadas = new HashSet<>();
 
     public PartidaQuiz(String jogador1, String nome, String senha) {
         super(jogador1, nome, senha);
     }
 
-    public void configurar(List<String> categorias, String dificuldade) {
+    public void configurar(List<String> categorias, String dificuldade, boolean modoRapido) {
         this.categorias = categorias != null ? categorias : new ArrayList<>();
         this.dificuldade = dificuldade != null ? dificuldade : "";
+        this.modoRapido = modoRapido;
     }
 
     @Override
@@ -96,7 +98,8 @@ public class PartidaQuiz extends PartidaBase {
         boolean acertou = perguntaAtual.estaCorreta(resposta);
         acertouPergunta.put(jogador, acertou);
         if (acertou) {
-            int valor = "hard".equals(perguntaAtual.getDificuldade()) ? 2 : 1;
+            boolean dificil = "hard".equals(perguntaAtual.getDificuldade());
+            int valor = modoRapido ? (dificil ? 4 : 2) : (dificil ? 2 : 1);
             acertosRodada.merge(jogador, valor, Integer::sum);
         }
         return todosResponderam();

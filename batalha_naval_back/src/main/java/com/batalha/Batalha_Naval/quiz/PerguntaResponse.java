@@ -9,14 +9,16 @@ public class PerguntaResponse {
     private final int indice;
     private final int total;
     private final String dificuldade;
+    private final boolean modoRapido;
 
-    public PerguntaResponse(String pergunta, List<String> opcoes, int segundos, int indice, int total, String dificuldade) {
+    public PerguntaResponse(String pergunta, List<String> opcoes, int segundos, int indice, int total, String dificuldade, boolean modoRapido) {
         this.pergunta = pergunta;
         this.opcoes = opcoes;
         this.segundos = segundos;
         this.indice = indice;
         this.total = total;
         this.dificuldade = dificuldade;
+        this.modoRapido = modoRapido;
     }
 
     public String getPergunta() { return pergunta; }
@@ -25,5 +27,6 @@ public class PerguntaResponse {
     public int getIndice() { return indice; }
     public int getTotal() { return total; }
     public String getDificuldade() { return dificuldade; }
+    public boolean isModoRapido() { return modoRapido; }
     public String getTipo() { return "PERGUNTA"; }
 }

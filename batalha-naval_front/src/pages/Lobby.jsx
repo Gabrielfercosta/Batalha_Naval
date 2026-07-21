@@ -85,6 +85,7 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada, aoIniciarQuiz }) {
     const [senhaDigitada, setSenhaDigitada] = useState('');
     const [categoriasAtivas, setCategoriasAtivas] = useState(() => new Set(CATEGORIAS.map((c) => c.id)));
     const [dificuldade, setDificuldade] = useState('todas');
+    const [modoRapido, setModoRapido] = useState(false);
 
     function toggleCategoria(id) {
         setCategoriasAtivas((prev) => {
@@ -128,7 +129,7 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada, aoIniciarQuiz }) {
             if (modo === 'quiz') {
                 const cats = Array.from(categoriasAtivas);
                 if (cats.length === 0) { setMensagem('Escolha ao menos 1 categoria.'); return; }
-                const p = await criarPartidaQuiz(jogador, nome, senha, cats, dificuldade === 'todas' ? '' : dificuldade);
+                const p = await criarPartidaQuiz(jogador, nome, senha, cats, dificuldade === 'todas' ? '' : dificuldade, modoRapido);
                 aoIniciarQuiz(p.gameId);
             } else {
                 const api = apiPorModo[modo];
@@ -204,6 +205,10 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada, aoIniciarQuiz }) {
                             </button>
                         ))}
                     </div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, cursor: 'pointer', fontSize: 14 }}>
+                        <input type="checkbox" checked={modoRapido} onChange={() => setModoRapido(!modoRapido)} />
+                        ⚡ Modo Rápido <span style={{ opacity: 0.6, fontSize: 12 }}>(todo acerto vale 2 tiros)</span>
+                    </label>
                 </div>
             )}
 

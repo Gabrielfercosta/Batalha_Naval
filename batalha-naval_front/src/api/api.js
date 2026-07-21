@@ -96,8 +96,8 @@ export function buscarPartidaMinada(gameId) {
     return pedir(`${MINADO_BASE}/${gameId}`);
 }
 
-export function criarPartidaQuiz(jogador, nome, senha, categorias, dificuldade) {
-    return pedir(`${QUIZ_BASE}/create`, 'POST', { jogador, nome, senha, categorias, dificuldade });
+export function criarPartidaQuiz(jogador, nome, senha, categorias, dificuldade, modoRapido) {
+    return pedir(`${QUIZ_BASE}/create`, 'POST', { jogador, nome, senha, categorias, dificuldade, modoRapido });
 }
 
 export function entrarPartidaQuiz(gameId, jogador, senha) {

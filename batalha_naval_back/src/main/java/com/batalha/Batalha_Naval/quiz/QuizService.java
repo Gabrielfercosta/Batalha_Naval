@@ -45,9 +45,9 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
         return new PartidaQuiz(jogador, nome, senha);
     }
 
-    public String criarPartidaQuiz(String jogador, String nome, String senha, List<String> categorias, String dificuldade) {
+    public String criarPartidaQuiz(String jogador, String nome, String senha, List<String> categorias, String dificuldade, boolean modoRapido) {
         String gameId = criarPartida(jogador, nome, senha);
-        buscarPartida(gameId).configurar(categorias, dificuldade);
+        buscarPartida(gameId).configurar(categorias, dificuldade, modoRapido);
         return gameId;
     }
 
@@ -155,7 +155,7 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
         PerguntaResponse resposta = new PerguntaResponse(
                 pergunta.getPergunta(), pergunta.getOpcoes(), SEGUNDOS_RESPOSTA,
                 partida.getPerguntaIndice() + 1, PartidaQuiz.PERGUNTAS_POR_RODADA,
-                pergunta.getDificuldade());
+                pergunta.getDificuldade(), partida.isModoRapido());
         messaging.convertAndSend("/topic/quiz/" + gameId, resposta);
 
         agendarTimer(gameId);

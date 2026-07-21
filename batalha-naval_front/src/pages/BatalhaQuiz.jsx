@@ -36,7 +36,7 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
                     setMensagem('');
                     setStatus('EM_ANDAMENTO');
                 } else if (ev.tipo === 'PERGUNTA') {
-                    setPergunta({ texto: ev.pergunta, opcoes: ev.opcoes, indice: ev.indice, total: ev.total, dificuldade: ev.dificuldade });
+                    setPergunta({ texto: ev.pergunta, opcoes: ev.opcoes, indice: ev.indice, total: ev.total, dificuldade: ev.dificuldade, modoRapido: ev.modoRapido });
                     setResultado(null);
                     setPlacar(null);
                     setRespondi(false);
@@ -177,20 +177,28 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
             );
         }
         if (pergunta) {
-            const valorTiro = pergunta.dificuldade === 'hard' ? 2 : 1;
-            const labelDif = pergunta.dificuldade === 'hard' ? '·· Difícil — vale 2 tiros!' : pergunta.dificuldade === 'medium' ? '· Médio' : '🌟 Fácil';
+            const dificil = pergunta.dificuldade === 'hard';
+            const valorTiro = pergunta.modoRapido ? (dificil ? 4 : 2) : (dificil ? 2 : 1);
+            const nomeDif = dificil ? '·· Difícil' : pergunta.dificuldade === 'medium' ? '· Médio' : '🌟 Fácil';
+            const plural = valorTiro > 1 ? 'tiros' : 'tiro';
             return (
                 <>
-                    <div style={{ display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontSize: 13, opacity: 0.85 }}>Pergunta {pergunta.indice}/{pergunta.total}</span>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: valorTiro === 2 ? '#ffd700' : '#ffffff', textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>{labelDif}</span>
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: 15, fontWeight: 700 }}>Pergunta {pergunta.indice}/{pergunta.total}</span>
+                        <span style={{
+                            fontSize: 'clamp(14px, 2.2vw, 18px)', fontWeight: 800, color: '#ffffff',
+                            background: dificil ? '#c0392b' : '#1c7cbd', padding: '5px 14px', borderRadius: 999,
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.35)'
+                        }}>
+                            {nomeDif} · vale {valorTiro} {plural}
+                        </span>
                     </div>
                     <div style={{ fontSize: 22, fontWeight: 800 }}>⏱️ {segundos}s</div>
-                    <h3 style={{ margin: '6px 0' }}>{pergunta.texto}</h3>
+                    <h3 style={{ margin: '6px 0', fontSize: 'clamp(14px, 2.5vw, 20px)' }}>{pergunta.texto}</h3>
                     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
                         {pergunta.opcoes.map((op) => (
-                            <button key={op} onClick={() => responder(op)} disabled={respondi} style={{ opacity: respondi && escolhida !== op ? 0.5 : 1, fontWeight: escolhida === op ? 800 : 400 }}>
-                                {op}
+                            <button key={op} onClick={() => responder(op)} disabled={respondi} style={{ opacity: respondi && escolhida !== op ? 0.5 : 1, fontWeight: escolhida === op ? 800 : 400, fontSize: 'clamp(12px, 2vw, 16px)', padding: '8px 14px' }}>
+                            {op}
                             </button>
                         ))}
                     </div>
@@ -224,7 +232,7 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
                     <span className="contagem-numero" key={contagem}>{contagem}</span>
                 </div>
             )}
-            <div className="painel painel-batalha" style={{ maxWidth: 560 }}>
+            <div className="painel painel-batalha" style={{ maxWidth: '90vw', width: 560, fontSize: 'clamp(13px, 2vw, 16px)' }}>
                 {painel()}
                 {mensagem && <p style={{ color: '#ffb4b4', margin: '8px 0 0' }}>{mensagem}</p>}
             </div>

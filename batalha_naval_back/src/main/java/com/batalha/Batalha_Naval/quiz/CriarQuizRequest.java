@@ -12,4 +12,5 @@ public class CriarQuizRequest {
     private String senha;
     private List<String> categorias;
     private String dificuldade;
+    private boolean modoRapido;
 }

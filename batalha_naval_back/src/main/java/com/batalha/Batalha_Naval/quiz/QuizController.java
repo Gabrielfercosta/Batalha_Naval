@@ -27,7 +27,7 @@ public class QuizController {
     public PartidaQuizResponse criar(@RequestBody CriarQuizRequest request, Principal principal) {
         String gameId = quizService.criarPartidaQuiz(
                 principal.getName(), request.getNome(), request.getSenha(),
-                request.getCategorias(), request.getDificuldade());
+                request.getCategorias(), request.getDificuldade(), request.isModoRapido());
         return new PartidaQuizResponse(gameId, quizService.buscarPartida(gameId));
     }
 
