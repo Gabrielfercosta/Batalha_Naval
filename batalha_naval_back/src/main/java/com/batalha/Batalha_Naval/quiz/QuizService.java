@@ -179,20 +179,28 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
                 partida.getPerguntaIndice() + 1));
 
         if (partida.ultimaPergunta()) {
-            synchronized (partida) {
-                partida.iniciarFaseTiros();
-            }
-            messaging.convertAndSend("/topic/quiz/" + gameId, new PlacarResponse(
-                    new HashMap<>(partida.getAcertosRodada()), partida.proximoAtirador()));
-
-            if (partida.faseTirosAcabou()) {
-                agenda.schedule(() -> iniciarRodadaComContagem(gameId), DELAY_ENTRE_RODADAS_MS, TimeUnit.MILLISECONDS);
-            }
+            agenda.schedule(() -> iniciarFaseTiros(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
         } else {
             synchronized (partida) {
                 partida.avancarPergunta();
             }
             agenda.schedule(() -> iniciarPergunta(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void iniciarFaseTiros(String gameId) {
+        PartidaQuiz partida = partidas.get(gameId);
+        if (partida == null || partida.getStatus() != StatusPartida.EM_ANDAMENTO) {
+            return;
+        }
+        synchronized (partida) {
+            partida.iniciarFaseTiros();
+        }
+        messaging.convertAndSend("/topic/quiz/" + gameId, new PlacarResponse(
+                new HashMap<>(partida.getAcertosRodada()), partida.proximoAtirador()));
+
+        if (partida.faseTirosAcabou()) {
+            agenda.schedule(() -> iniciarRodadaComContagem(gameId), DELAY_ENTRE_RODADAS_MS, TimeUnit.MILLISECONDS);
         }
     }
 

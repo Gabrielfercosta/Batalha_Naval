@@ -98,8 +98,12 @@ public class PartidaQuiz extends PartidaBase {
         boolean acertou = perguntaAtual.estaCorreta(resposta);
         acertouPergunta.put(jogador, acertou);
         if (acertou) {
-            boolean dificil = "hard".equals(perguntaAtual.getDificuldade());
-            int valor = modoRapido ? (dificil ? 4 : 2) : (dificil ? 2 : 1);
+            int base = switch (perguntaAtual.getDificuldade()) {
+                case "hard" -> 3;
+                case "medium" -> 2;
+                default -> 1;
+            };
+            int valor = modoRapido ? base * 2 : base;
             acertosRodada.merge(jogador, valor, Integer::sum);
         }
         return todosResponderam();

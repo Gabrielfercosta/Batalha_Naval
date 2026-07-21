@@ -178,7 +178,8 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
         }
         if (pergunta) {
             const dificil = pergunta.dificuldade === 'hard';
-            const valorTiro = pergunta.modoRapido ? (dificil ? 4 : 2) : (dificil ? 2 : 1);
+            const base = dificil ? 3 : pergunta.dificuldade === 'medium' ? 2 : 1;
+            const valorTiro = pergunta.modoRapido ? base * 2 : base;
             const nomeDif = dificil ? '·· Difícil' : pergunta.dificuldade === 'medium' ? '· Médio' : '🌟 Fácil';
             const plural = valorTiro > 1 ? 'tiros' : 'tiro';
             return (
