@@ -107,6 +107,14 @@ function App() {
         setTela('lobby');
     }
 
+    function irParaMenu() {
+        if (window.confirm('Voltar ao menu principal? Você vai sair da partida atual.')) {
+            voltarLobby();
+        }
+    }
+
+    const emJogo = ['posicionar', 'posicionarQuiz', 'posicionarMinado', 'batalha', 'batalhaQuiz', 'batalhaMinada'].includes(tela);
+
     return (
         <div className="container">
             {!somAtivado && (
@@ -126,6 +134,9 @@ function App() {
             {jogador && (
                 <div style={{ position: 'fixed', top: 12, right: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, zIndex: 100 }}>
                     <span style={{ background: 'rgba(15, 44, 74, 0.65)', color: '#fff', fontWeight: 700, padding: '6px 12px', borderRadius: 999 }}> {jogador}</span>
+                    {emJogo && (
+                        <button onClick={irParaMenu} style={{ padding: '6px 14px', fontSize: 14 }}>Menu</button>
+                    )}
                     <button onClick={sair} style={{ padding: '6px 14px', fontSize: 14 }}>Sair</button>
                 </div>
             )}
