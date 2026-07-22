@@ -97,6 +97,12 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada, aoIniciarQuiz }) {
         });
     }
 
+    const todasMarcadas = categoriasAtivas.size === CATEGORIAS.length;
+
+    function alternarTodasCategorias() {
+        setCategoriasAtivas(todasMarcadas ? new Set() : new Set(CATEGORIAS.map((c) => c.id)));
+    }
+
     const apiPorModo = {
         classico: { criar: criarPartida, entrar: entrarPartida, iniciar: aoIniciarPartida },
         minada: { criar: criarPartidaMinada, entrar: entrarPartidaMinada, iniciar: aoIniciarMinada },
@@ -195,7 +201,12 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada, aoIniciarQuiz }) {
 
             {modo === 'quiz' && (
                 <div style={{ width: '100%' }}>
-                    <p style={{ margin: '4px 0', fontSize: 14 }}>Categorias <span style={{ opacity: 0.6, fontSize: 12 }}>(clique pra desativar)</span></p>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap', margin: '4px 0' }}>
+                        <p style={{ margin: 0, fontSize: 14 }}>Categorias <span style={{ opacity: 0.6, fontSize: 12 }}>(clique pra desativar)</span></p>
+                        <button type="button" onClick={alternarTodasCategorias} style={{ margin: 0, padding: '4px 10px', fontSize: 12 }}>
+                            {todasMarcadas ? 'Desmarcar todas' : 'Marcar todas'}
+                        </button>
+                    </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
                         {CATEGORIAS.map((c) => (
                             <button key={c.id} onClick={() => toggleCategoria(c.id)} style={{ fontSize: 12, padding: '4px 8px', margin: 0, opacity: categoriasAtivas.has(c.id) ? 1 : 0.35 }}>
