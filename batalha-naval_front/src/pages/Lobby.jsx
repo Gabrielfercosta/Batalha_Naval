@@ -224,7 +224,7 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada, aoIniciarQuiz }) {
                     </div>
                     <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, cursor: 'pointer', fontSize: 14 }}>
                         <input type="checkbox" checked={modoRapido} onChange={() => setModoRapido(!modoRapido)} />
-                        ⚡ Modo Rápido <span style={{ opacity: 0.6, fontSize: 12 }}>(todo acerto vale 2 tiros)</span>
+                        ⚡ Modo Rápido <span style={{ opacity: 0.6, fontSize: 12 }}>(dobro de tiros)</span>
                     </label>
                 </div>
             )}
