@@ -40,7 +40,7 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
                     setDesempate(null);
                     setStatus('EM_ANDAMENTO');
                 } else if (ev.tipo === 'PERGUNTA') {
-                    setPergunta({ texto: ev.pergunta, opcoes: ev.opcoes, indice: ev.indice, total: ev.total, dificuldade: ev.dificuldade, modoRapido: ev.modoRapido });
+                    setPergunta({ texto: ev.pergunta, opcoes: ev.opcoes, indice: ev.indice, total: ev.total, dificuldade: ev.dificuldade, modoRapido: ev.modoRapido, desempate: ev.desempate || false });
                     setResultado(null);
                     setPlacar(null);
                     setRespondi(false);
@@ -75,16 +75,21 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
                     setStatus(ev.status);
                     setVencedor(ev.vencedor);
                 } else if (ev.tipo === 'DESEMPATE') {
-                    setDesempate({ ativo: true, mensagem: ev.mensagem, vencedor: null });
+                    setDesempate({ ativo: true, mensagem: ev.mensagem, vencedor: null, pontuacao: ev.pontuacao });
                     setPergunta(null);
                     setResultado(null);
                     setPlacar(null);
                     setContagem(null);
                     setSegundos(null);
+                    setRespondi(false);
+                    setEscolhida(null);
                 } else if (ev.tipo === 'DESEMPATE_FIM') {
-                    setDesempate({ ativo: false, mensagem: ev.mensagem, vencedor: ev.vencedorDesempate });
+                    setDesempate({ ativo: false, mensagem: ev.mensagem, vencedor: ev.vencedorDesempate, tiros: ev.tiros });
+                    setResultado(null);
+                    setPergunta(null);
                 } else if (ev.tipo === 'DESEMPATE_CONTINUA') {
                     setDesempate((d) => ({ ...d, mensagem: ev.mensagem }));
+                    setResultado(null);
                 } else if (ev.tipo === 'ERRO') {
                     setMensagem(ev.mensagem);
                 }
@@ -186,16 +191,26 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
         if (desempate && desempate.ativo && !pergunta && !resultado) {
             return (
                 <>
-                    <h2 style={{ margin: 0, color: '#ffeb3b', textShadow: '0 2px 8px rgba(0,0,0,0.7)' }}>⚡ Morte Súbita!</h2>
-                    <p style={{ margin: '8px 0 0', fontWeight: 600, fontSize: 'clamp(14px, 2.2vw, 18px)' }}>{desempate.mensagem}</p>
+                    <h2 style={{ margin: 0, color: '#ffeb3b', textShadow: '0 2px 8px rgba(0,0,0,0.7)' }}>⚡ MORTE SÚBITA! ⚡</h2>
+                    <p style={{ margin: '8px 0 0', fontWeight: 600, fontSize: 'clamp(14px, 2.2vw, 18px)' }}>
+                        Empate em {desempate.pontuacao} pontos!
+                    </p>
+                    <p style={{ margin: '4px 0 0', fontSize: 'clamp(13px, 2vw, 16px)' }}>
+                        Quem errar primeiro perde os tiros!
+                    </p>
                 </>
             );
         }
         if (desempate && !desempate.ativo && desempate.vencedor && !placar && !pergunta) {
+            const ganhou = desempate.vencedor === jogador;
             return (
                 <>
-                    <h3 style={{ margin: 0, color: '#4caf50' }}>🏅 {desempate.vencedor === jogador ? 'Você venceu' : desempate.vencedor + ' venceu'} a morte súbita!</h3>
-                    <p style={{ margin: '6px 0 0', fontWeight: 600 }}>{desempate.mensagem}</p>
+                    <h3 style={{ margin: 0, color: ganhou ? '#4caf50' : '#f44336' }}>
+                        {ganhou ? '🏅 Você venceu a morte súbita!' : `💀 ${desempate.vencedor} venceu a morte súbita!`}
+                    </h3>
+                    <p style={{ margin: '6px 0 0', fontWeight: 600 }}>
+                        {ganhou ? `Você ganha ${desempate.tiros} tiros!` : `${desempate.vencedor} ganha ${desempate.tiros} tiros!`}
+                    </p>
                 </>
             );
         }
@@ -217,12 +232,17 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
             const valorTiro = pergunta.modoRapido ? base * 2 : base;
             const nomeDif = dificil ? '·· Difícil' : pergunta.dificuldade === 'medium' ? '· Médio' : '🌟 Fácil';
             const plural = valorTiro > 1 ? 'tiros' : 'tiro';
-            const isMorteSub = pergunta.total === 0;
+            const isMorteSub = pergunta.desempate === true;
             return (
                 <>
                     <div style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
                         {isMorteSub
-                            ? <span style={{ fontSize: 15, fontWeight: 800, color: '#ffeb3b', textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>⚡ Morte Súbita · Pergunta {pergunta.indice}</span>
+                            ? <span style={{
+                                fontSize: 'clamp(14px, 2.2vw, 18px)', fontWeight: 800, color: '#ffeb3b',
+                                textShadow: '0 1px 4px rgba(0,0,0,0.7)',
+                                background: 'rgba(255,235,59,0.15)', padding: '5px 14px', borderRadius: 999,
+                                border: '2px solid #ffeb3b'
+                            }}>⚡ MORTE SÚBITA · Pergunta Extra {pergunta.indice}</span>
                             : <span style={{ fontSize: 15, fontWeight: 700 }}>Pergunta {pergunta.indice}/{pergunta.total}</span>}
                         {!isMorteSub && <span style={{
                             fontSize: 'clamp(14px, 2.2vw, 18px)', fontWeight: 800, color: '#ffffff',

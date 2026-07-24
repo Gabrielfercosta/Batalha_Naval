@@ -216,7 +216,8 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
             }
             messaging.convertAndSend("/topic/quiz/" + gameId, Map.of(
                     "tipo", "DESEMPATE",
-                    "mensagem", "Empate! Morte súbita — quem errar primeiro perde!"));
+                    "mensagem", "Empate! Morte súbita — quem errar primeiro perde!",
+                    "pontuacao", a1));
             agenda.schedule(() -> iniciarPerguntaDesempate(gameId), DELAY_ENTRE_RODADAS_MS, TimeUnit.MILLISECONDS);
         } else {
             // Ou não empatou, ou ambos com 0 (vai pra fase de tiros normal — ninguém atira)
@@ -258,8 +259,8 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
 
         PerguntaResponse resposta = new PerguntaResponse(
                 pergunta.getPergunta(), pergunta.getOpcoes(), SEGUNDOS_RESPOSTA,
-                partida.getPerguntaDesempate(), 0,
-                pergunta.getDificuldade(), partida.isModoRapido());
+                partida.getPerguntaDesempate(), partida.getPerguntaDesempate(),
+                pergunta.getDificuldade(), partida.isModoRapido(), true);
         messaging.convertAndSend("/topic/quiz/" + gameId, resposta);
 
         agendarTimer(gameId);
@@ -279,10 +280,12 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
             synchronized (partida) {
                 partida.finalizarDesempate();
             }
+            int tirosVencedor = partida.getAcertosRodada().getOrDefault(vencedor, 0);
             messaging.convertAndSend("/topic/quiz/" + gameId, Map.of(
                     "tipo", "DESEMPATE_FIM",
                     "vencedorDesempate", vencedor,
-                    "mensagem", vencedor + " venceu a morte súbita!"));
+                    "tiros", tirosVencedor,
+                    "mensagem", vencedor + " venceu a morte súbita e ganha " + tirosVencedor + " tiros!"));
             agenda.schedule(() -> iniciarFaseTiros(gameId), DELAY_ENTRE_RODADAS_MS, TimeUnit.MILLISECONDS);
         } else {
             // Ambos acertaram ou ambos erraram — continuar morte súbita

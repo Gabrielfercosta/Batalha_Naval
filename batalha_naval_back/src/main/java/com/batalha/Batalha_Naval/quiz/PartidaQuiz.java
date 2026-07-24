@@ -39,6 +39,7 @@ public class PartidaQuiz extends PartidaBase {
     private boolean emDesempate = false;
     private int perguntaDesempate = 0;
     private String vencedorDesempate = null;
+    private int pontuacaoEmpatada = 0;
 
     public PartidaQuiz(String jogador1, String nome, String senha) {
         super(jogador1, nome, senha);
@@ -141,6 +142,7 @@ public class PartidaQuiz extends PartidaBase {
         emDesempate = true;
         perguntaDesempate = 0;
         vencedorDesempate = null;
+        pontuacaoEmpatada = acertosRodada.getOrDefault(jogador1, 0);
     }
 
     public void prepararPerguntaDesempate() {
@@ -165,10 +167,10 @@ public class PartidaQuiz extends PartidaBase {
     }
 
     public void finalizarDesempate() {
-        // Dá 1 tiro ao vencedor do desempate
+        // Vencedor ganha a pontuação original empatada + 1 bônus, perdedor fica com 0
         emDesempate = false;
         if (vencedorDesempate != null) {
-            acertosRodada.put(vencedorDesempate, 1);
+            acertosRodada.put(vencedorDesempate, pontuacaoEmpatada + 1);
             String perdedor = vencedorDesempate.equals(jogador1) ? jogador2 : jogador1;
             acertosRodada.put(perdedor, 0);
         }
@@ -257,5 +259,6 @@ public class PartidaQuiz extends PartidaBase {
         this.emDesempate = false;
         this.perguntaDesempate = 0;
         this.vencedorDesempate = null;
+        this.pontuacaoEmpatada = 0;
     }
 }
