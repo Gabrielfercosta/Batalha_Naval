@@ -35,6 +35,11 @@ public class PartidaQuiz extends PartidaBase {
     private boolean modoRapido = false;
     private final Set<String> perguntasUsadas = new HashSet<>();
 
+    // Morte súbita (desempate)
+    private boolean emDesempate = false;
+    private int perguntaDesempate = 0;
+    private String vencedorDesempate = null;
+
     public PartidaQuiz(String jogador1, String nome, String senha) {
         super(jogador1, nome, senha);
     }
@@ -94,7 +99,7 @@ public class PartidaQuiz extends PartidaBase {
         responderam.add(jogador);
         boolean acertou = perguntaAtual.estaCorreta(resposta);
         acertouPergunta.put(jogador, acertou);
-        if (acertou) {
+        if (acertou && !emDesempate) {
             int base = switch (perguntaAtual.getDificuldade()) {
                 case "hard" -> 3;
                 case "medium" -> 2;
@@ -123,6 +128,50 @@ public class PartidaQuiz extends PartidaBase {
 
     public void avancarPergunta() {
         perguntaIndice++;
+    }
+
+    public boolean rodadaEmpatou() {
+        if (jogador2 == null) return false;
+        int a1 = acertosRodada.getOrDefault(jogador1, 0);
+        int a2 = acertosRodada.getOrDefault(jogador2, 0);
+        return a1 == a2;
+    }
+
+    public void iniciarDesempate() {
+        emDesempate = true;
+        perguntaDesempate = 0;
+        vencedorDesempate = null;
+    }
+
+    public void prepararPerguntaDesempate() {
+        perguntaDesempate++;
+        responderam.clear();
+        acertouPergunta.clear();
+        resolvida = false;
+    }
+
+    public String resolverDesempate() {
+        if (jogador2 == null) return null;
+        boolean j1Acertou = acertouPergunta.getOrDefault(jogador1, false);
+        boolean j2Acertou = acertouPergunta.getOrDefault(jogador2, false);
+
+        if (j1Acertou && !j2Acertou) {
+            vencedorDesempate = jogador1;
+        } else if (j2Acertou && !j1Acertou) {
+            vencedorDesempate = jogador2;
+        }
+        // Se ambos acertaram ou ambos erraram, continua null (não houve desempate)
+        return vencedorDesempate;
+    }
+
+    public void finalizarDesempate() {
+        // Dá 1 tiro ao vencedor do desempate
+        emDesempate = false;
+        if (vencedorDesempate != null) {
+            acertosRodada.put(vencedorDesempate, 1);
+            String perdedor = vencedorDesempate.equals(jogador1) ? jogador2 : jogador1;
+            acertosRodada.put(perdedor, 0);
+        }
     }
 
     public void iniciarFaseTiros() {
@@ -205,5 +254,8 @@ public class PartidaQuiz extends PartidaBase {
         this.acertosRodada.clear();
         this.tirosRestantes.clear();
         this.ordemTiro.clear();
+        this.emDesempate = false;
+        this.perguntaDesempate = 0;
+        this.vencedorDesempate = null;
     }
 }

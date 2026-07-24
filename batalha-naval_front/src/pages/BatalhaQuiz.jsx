@@ -21,6 +21,7 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
     const [segundos, setSegundos] = useState(null);
     const [naviosInimigos, setNaviosInimigos] = useState([]);
     const finalizadoRef = useRef(false);
+    const [desempate, setDesempate] = useState(null);
 
     useEffect(() => {
         const c = conectarQuiz(
@@ -36,6 +37,7 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
                     setProximoAtirador(null);
                     setSegundos(null);
                     setMensagem('');
+                    setDesempate(null);
                     setStatus('EM_ANDAMENTO');
                 } else if (ev.tipo === 'PERGUNTA') {
                     setPergunta({ texto: ev.pergunta, opcoes: ev.opcoes, indice: ev.indice, total: ev.total, dificuldade: ev.dificuldade, modoRapido: ev.modoRapido });
@@ -55,6 +57,7 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
                     setProximoAtirador(ev.proximoAtirador);
                     setPergunta(null);
                     setResultado(null);
+                    setDesempate(null);
                 } else if (ev.tipo === 'TIRO') {
                     if (ev.autor) {
                         const chave = `${ev.linha}-${ev.coluna}`;
@@ -71,6 +74,17 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
                     if (ev.status === 'FINALIZADA') finalizadoRef.current = true;
                     setStatus(ev.status);
                     setVencedor(ev.vencedor);
+                } else if (ev.tipo === 'DESEMPATE') {
+                    setDesempate({ ativo: true, mensagem: ev.mensagem, vencedor: null });
+                    setPergunta(null);
+                    setResultado(null);
+                    setPlacar(null);
+                    setContagem(null);
+                    setSegundos(null);
+                } else if (ev.tipo === 'DESEMPATE_FIM') {
+                    setDesempate({ ativo: false, mensagem: ev.mensagem, vencedor: ev.vencedorDesempate });
+                } else if (ev.tipo === 'DESEMPATE_CONTINUA') {
+                    setDesempate((d) => ({ ...d, mensagem: ev.mensagem }));
                 } else if (ev.tipo === 'ERRO') {
                     setMensagem(ev.mensagem);
                 }
@@ -169,10 +183,27 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
                 </>
             );
         }
+        if (desempate && desempate.ativo && !pergunta && !resultado) {
+            return (
+                <>
+                    <h2 style={{ margin: 0, color: '#ffeb3b', textShadow: '0 2px 8px rgba(0,0,0,0.7)' }}>⚡ Morte Súbita!</h2>
+                    <p style={{ margin: '8px 0 0', fontWeight: 600, fontSize: 'clamp(14px, 2.2vw, 18px)' }}>{desempate.mensagem}</p>
+                </>
+            );
+        }
+        if (desempate && !desempate.ativo && desempate.vencedor && !placar && !pergunta) {
+            return (
+                <>
+                    <h3 style={{ margin: 0, color: '#4caf50' }}>🏅 {desempate.vencedor === jogador ? 'Você venceu' : desempate.vencedor + ' venceu'} a morte súbita!</h3>
+                    <p style={{ margin: '6px 0 0', fontWeight: 600 }}>{desempate.mensagem}</p>
+                </>
+            );
+        }
         if (resultado) {
             const oponente = nomeOponente(resultado.acertos);
             return (
                 <>
+                    {desempate && desempate.ativo && <span style={{ color: '#ffeb3b', fontWeight: 800, fontSize: 13 }}>⚡ MORTE SÚBITA</span>}
                     <h3 style={{ margin: 0 }}>Resposta certa: <b>{resultado.respostaCorreta}</b></h3>
                     <p style={{ margin: '6px 0 0' }}>
                         Você: {resultado.acertos[jogador] ? '✓' : '✗'} &nbsp;|&nbsp; {oponente || 'Oponente'}: {resultado.acertos[oponente] ? '✓' : '✗'}
@@ -186,17 +217,20 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
             const valorTiro = pergunta.modoRapido ? base * 2 : base;
             const nomeDif = dificil ? '·· Difícil' : pergunta.dificuldade === 'medium' ? '· Médio' : '🌟 Fácil';
             const plural = valorTiro > 1 ? 'tiros' : 'tiro';
+            const isMorteSub = pergunta.total === 0;
             return (
                 <>
                     <div style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: 15, fontWeight: 700 }}>Pergunta {pergunta.indice}/{pergunta.total}</span>
-                        <span style={{
+                        {isMorteSub
+                            ? <span style={{ fontSize: 15, fontWeight: 800, color: '#ffeb3b', textShadow: '0 1px 4px rgba(0,0,0,0.7)' }}>⚡ Morte Súbita · Pergunta {pergunta.indice}</span>
+                            : <span style={{ fontSize: 15, fontWeight: 700 }}>Pergunta {pergunta.indice}/{pergunta.total}</span>}
+                        {!isMorteSub && <span style={{
                             fontSize: 'clamp(14px, 2.2vw, 18px)', fontWeight: 800, color: '#ffffff',
                             background: dificil ? '#c0392b' : '#1c7cbd', padding: '5px 14px', borderRadius: 999,
                             boxShadow: '0 2px 6px rgba(0,0,0,0.35)'
                         }}>
                             {nomeDif} · vale {valorTiro} {plural}
-                        </span>
+                        </span>}
                     </div>
                     <div style={{ fontSize: 22, fontWeight: 800 }}>⏱️ {segundos}s</div>
                     <h3 style={{ margin: '6px 0', fontSize: 'clamp(14px, 2.5vw, 20px)' }}>{pergunta.texto}</h3>

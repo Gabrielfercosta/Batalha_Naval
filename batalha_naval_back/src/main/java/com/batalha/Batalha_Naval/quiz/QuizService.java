@@ -187,13 +187,109 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
                 new HashMap<>(partida.getAcertouPergunta()),
                 partida.getPerguntaIndice() + 1));
 
-        if (partida.ultimaPergunta()) {
-            agenda.schedule(() -> iniciarFaseTiros(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
+        if (partida.isEmDesempate()) {
+            // Estamos em morte súbita — verificar se houve vencedor
+            agenda.schedule(() -> resolverDesempate(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
+        } else if (partida.ultimaPergunta()) {
+            // Fim das perguntas normais — verificar se empatou
+            agenda.schedule(() -> verificarEmpate(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
         } else {
             synchronized (partida) {
                 partida.avancarPergunta();
             }
             agenda.schedule(() -> iniciarPergunta(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void verificarEmpate(String gameId) {
+        PartidaQuiz partida = partidas.get(gameId);
+        if (partida == null || partida.getStatus() != StatusPartida.EM_ANDAMENTO) {
+            return;
+        }
+        int a1 = partida.getAcertosRodada().getOrDefault(partida.getJogador1(), 0);
+        int a2 = partida.getAcertosRodada().getOrDefault(partida.getJogador2(), 0);
+
+        if (a1 == a2 && a1 > 0) {
+            // Empate com acertos! Iniciar morte súbita
+            synchronized (partida) {
+                partida.iniciarDesempate();
+            }
+            messaging.convertAndSend("/topic/quiz/" + gameId, Map.of(
+                    "tipo", "DESEMPATE",
+                    "mensagem", "Empate! Morte súbita — quem errar primeiro perde!"));
+            agenda.schedule(() -> iniciarPerguntaDesempate(gameId), DELAY_ENTRE_RODADAS_MS, TimeUnit.MILLISECONDS);
+        } else {
+            // Ou não empatou, ou ambos com 0 (vai pra fase de tiros normal — ninguém atira)
+            iniciarFaseTiros(gameId);
+        }
+    }
+
+    private void iniciarPerguntaDesempate(String gameId) {
+        PartidaQuiz partida = partidas.get(gameId);
+        if (partida == null || partida.getStatus() != StatusPartida.EM_ANDAMENTO) {
+            return;
+        }
+
+        synchronized (partida) {
+            partida.prepararPerguntaDesempate();
+        }
+
+        PerguntaTrivia pergunta = null;
+        try {
+            for (int i = 0; i < 8; i++) {
+                pergunta = triviaService.sortearPergunta(partida.getCategorias(), partida.getDificuldade());
+                if (partida.getPerguntasUsadas().add(pergunta.getPergunta())) {
+                    break;
+                }
+                if (i == 7) {
+                    partida.getPerguntasUsadas().clear();
+                    partida.getPerguntasUsadas().add(pergunta.getPergunta());
+                }
+            }
+        } catch (Exception e) {
+            messaging.convertAndSend("/topic/quiz/" + gameId, Map.of("tipo", "ERRO", "mensagem", "Não consegui buscar uma pergunta. Tentando de novo..."));
+            agenda.schedule(() -> iniciarPerguntaDesempate(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
+            return;
+        }
+
+        synchronized (partida) {
+            partida.iniciarPergunta(pergunta);
+        }
+
+        PerguntaResponse resposta = new PerguntaResponse(
+                pergunta.getPergunta(), pergunta.getOpcoes(), SEGUNDOS_RESPOSTA,
+                partida.getPerguntaDesempate(), 0,
+                pergunta.getDificuldade(), partida.isModoRapido());
+        messaging.convertAndSend("/topic/quiz/" + gameId, resposta);
+
+        agendarTimer(gameId);
+    }
+
+    private void resolverDesempate(String gameId) {
+        PartidaQuiz partida = partidas.get(gameId);
+        if (partida == null || partida.getStatus() != StatusPartida.EM_ANDAMENTO) {
+            return;
+        }
+        String vencedor;
+        synchronized (partida) {
+            vencedor = partida.resolverDesempate();
+        }
+        if (vencedor != null) {
+            // Alguém venceu o desempate
+            synchronized (partida) {
+                partida.finalizarDesempate();
+            }
+            messaging.convertAndSend("/topic/quiz/" + gameId, Map.of(
+                    "tipo", "DESEMPATE_FIM",
+                    "vencedorDesempate", vencedor,
+                    "mensagem", vencedor + " venceu a morte súbita!"));
+            agenda.schedule(() -> iniciarFaseTiros(gameId), DELAY_ENTRE_RODADAS_MS, TimeUnit.MILLISECONDS);
+        } else {
+            // Ambos acertaram ou ambos erraram — continuar morte súbita
+            messaging.convertAndSend("/topic/quiz/" + gameId, Map.of(
+                    "tipo", "DESEMPATE_CONTINUA",
+                    "mensagem", "Empate continua! Próxima pergunta..."));
+            agenda.schedule(() -> iniciarPerguntaDesempate(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
         }
     }
 
