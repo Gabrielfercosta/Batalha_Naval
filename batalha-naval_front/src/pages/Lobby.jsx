@@ -7,35 +7,38 @@ import {
 
 const TUTORIAIS = {
     classico: {
-        titulo: '🚢 Batalha Naval Clássico',
+        titulo: 'Batalha Naval Classico',
         passos: [
-            '🎯 Objetivo: afundar toda a frota inimiga antes que afundem a sua.',
-            'Posicione seus 5 navios no tabuleiro (escolha a direção: horizontal ou vertical).',
-            'Na sua vez, clique numa casa do Mar Inimigo para atirar.',
-            '💥 Acertou um navio? Você joga de novo. 🌊 Caiu na água? Passa a vez.',
-            'Afunde todos os navios do adversário para vencer!'
+            'Objetivo: afundar todos os 5 navios inimigos antes que o adversario afunde os seus.',
+            'Voce possui 5 navios: Porta-Avioes (5 casas), Encouracado (4), Cruzador (3), Submarino (3) e Destroyer (2). Posicione cada um no tabuleiro 10x10 escolhendo a direcao horizontal ou vertical. Pressione a tecla R para alternar a direcao antes de posicionar.',
+            'O jogo funciona por turnos alternados. Na sua vez, clique em uma casa do Mar Inimigo para disparar.',
+            'Se o tiro acertar um navio, voce ganha outro tiro imediatamente. Se cair na agua, a vez passa para o adversario.',
+            'Quando todas as casas de um navio sao atingidas, ele e marcado como AFUNDADO e seus destrocos aparecem no tabuleiro.',
+            'Vence o jogador que afundar toda a frota inimiga primeiro.'
         ]
     },
     minada: {
         titulo: 'Batalha Minada',
         passos: [
-            'Objetivo: encontrar toda a frota inimiga antes do adversário — sem pisar numa mina!',
-            'Tabuleiro 16x16: posicione seus navios e suas 20 minas.',
-            'É uma corrida: os dois jogam ao mesmo tempo.',
-            'Clique no Mar Inimigo para procurar. A água revela pistas (💣 minas e 🚢 navios por perto).',
-            'Achou todos os navios inimigos? Você vence. Mas se acertar uma mina, você perde!',
-            'Dica: o seu primeiro tiro é sempre seguro, nunca explode.'
+            'Objetivo: encontrar e acertar todos os navios inimigos antes do adversario, sem atingir nenhuma mina.',
+            'O tabuleiro e maior: 16x16. Voce posiciona os mesmos 5 navios e tambem 20 minas em posicoes estrategicas para dificultar a busca do adversario.',
+            'Diferente do modo classico, ambos os jogadores jogam ao mesmo tempo. E uma corrida: nao ha turnos alternados.',
+            'Ao clicar em uma casa do Mar Inimigo, se for agua, a casa revela pistas numericas indicando quantas minas e quantos navios existem nas casas vizinhas. Use essas informacoes para deduzir onde estao os navios.',
+            'Voce pode marcar casas suspeitas com bandeiras clicando com o botao direito do mouse, para se organizar melhor.',
+            'Se voce atingir uma mina, perde a partida imediatamente. Se encontrar todos os navios inimigos sem pisar em minas, voce vence.',
+            'Antes da partida comecar, ha uma contagem regressiva para garantir que ambos os jogadores estejam prontos.'
         ]
     },
     quiz: {
-        titulo: '🧠 Batalha Naval Quiz',
+        titulo: 'Batalha Naval Quiz',
         passos: [
-            '🎯 Objetivo: afundar toda a frota inimiga respondendo perguntas!',
-            'Posicione seus 5 navios (igual ao clássico).',
-            'Cada rodada tem 5 perguntas — os dois respondem ao mesmo tempo, com tempo limitado.',
-            'Você vê se o adversário acertou cada pergunta.',
-            'No fim das 5, cada acerto vale 1 tiro. Quem acertou mais atira primeiro!',
-            'Dá pra escolher as categorias e a dificuldade ao criar a sala.'
+            'Objetivo: afundar a frota inimiga conquistando tiros atraves de perguntas de conhecimento.',
+            'Posicione seus 5 navios no tabuleiro 10x10, da mesma forma que no modo classico (horizontal ou vertical, tecla R para girar).',
+            'A partida funciona em rodadas. Cada rodada apresenta perguntas que ambos os jogadores respondem ao mesmo tempo, com um tempo limite para cada resposta.',
+            'Apos cada pergunta, o resultado e exibido mostrando quem acertou e quem errou, junto com a resposta correta.',
+            'Cada acerto vale tiros: perguntas faceis valem 1 tiro, medias valem 2 e dificeis valem 3. No modo rapido, esses valores sao dobrados.',
+            'Ao final da rodada de perguntas, quem acertou mais dispara primeiro. Se ambos acertaram igual, os tiros sao distribuidos alternadamente.',
+            'Ao criar a sala, voce pode escolher as categorias das perguntas (Geral, Livros, Filmes, Musicas, Teatro, TV, Videogame) e o nivel de dificuldade.'
         ]
     }
 };
