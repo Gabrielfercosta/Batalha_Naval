@@ -182,22 +182,24 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
             partida.resolverPergunta();
         }
 
-        messaging.convertAndSend("/topic/quiz/" + gameId, new ResultadoRodadaResponse(
-                partida.getPerguntaAtual().getRespostaCorreta(),
-                new HashMap<>(partida.getAcertouPergunta()),
-                partida.getPerguntaIndice() + 1));
-
         if (partida.isEmDesempate()) {
-            // Estamos em morte súbita — verificar se houve vencedor
-            agenda.schedule(() -> resolverDesempate(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
-        } else if (partida.ultimaPergunta()) {
-            // Fim das perguntas normais — verificar se empatou
-            agenda.schedule(() -> verificarEmpate(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
+            // Morte súbita — resolver diretamente sem mostrar RESULTADO separado
+            resolverDesempate(gameId);
         } else {
-            synchronized (partida) {
-                partida.avancarPergunta();
+            messaging.convertAndSend("/topic/quiz/" + gameId, new ResultadoRodadaResponse(
+                    partida.getPerguntaAtual().getRespostaCorreta(),
+                    new HashMap<>(partida.getAcertouPergunta()),
+                    partida.getPerguntaIndice() + 1));
+
+            if (partida.ultimaPergunta()) {
+                // Fim das perguntas normais — verificar se empatou
+                agenda.schedule(() -> verificarEmpate(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
+            } else {
+                synchronized (partida) {
+                    partida.avancarPergunta();
+                }
+                agenda.schedule(() -> iniciarPergunta(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
             }
-            agenda.schedule(() -> iniciarPergunta(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -275,23 +277,33 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
         synchronized (partida) {
             vencedor = partida.resolverDesempate();
         }
+
+        String respostaCorreta = partida.getPerguntaAtual().getRespostaCorreta();
+        Map<String, Boolean> acertos = new HashMap<>(partida.getAcertouPergunta());
+
         if (vencedor != null) {
             // Alguém venceu o desempate
             synchronized (partida) {
                 partida.finalizarDesempate();
             }
             int tirosVencedor = partida.getAcertosRodada().getOrDefault(vencedor, 0);
-            messaging.convertAndSend("/topic/quiz/" + gameId, Map.of(
-                    "tipo", "DESEMPATE_FIM",
-                    "vencedorDesempate", vencedor,
-                    "tiros", tirosVencedor,
-                    "mensagem", vencedor + " venceu a morte súbita e ganha " + tirosVencedor + " tiros!"));
+            Map<String, Object> evento = new HashMap<>();
+            evento.put("tipo", "DESEMPATE_FIM");
+            evento.put("vencedorDesempate", vencedor);
+            evento.put("tiros", tirosVencedor);
+            evento.put("respostaCorreta", respostaCorreta);
+            evento.put("acertos", acertos);
+            evento.put("mensagem", vencedor + " venceu a morte súbita e atira primeiro!");
+            messaging.convertAndSend("/topic/quiz/" + gameId, evento);
             agenda.schedule(() -> iniciarFaseTiros(gameId), DELAY_ENTRE_RODADAS_MS, TimeUnit.MILLISECONDS);
         } else {
             // Ambos acertaram ou ambos erraram — continuar morte súbita
-            messaging.convertAndSend("/topic/quiz/" + gameId, Map.of(
-                    "tipo", "DESEMPATE_CONTINUA",
-                    "mensagem", "Empate continua! Próxima pergunta..."));
+            Map<String, Object> evento = new HashMap<>();
+            evento.put("tipo", "DESEMPATE_CONTINUA");
+            evento.put("respostaCorreta", respostaCorreta);
+            evento.put("acertos", acertos);
+            evento.put("mensagem", "Empate continua! Próxima pergunta...");
+            messaging.convertAndSend("/topic/quiz/" + gameId, evento);
             agenda.schedule(() -> iniciarPerguntaDesempate(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
         }
     }

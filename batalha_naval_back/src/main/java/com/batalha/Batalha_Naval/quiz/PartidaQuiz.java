@@ -167,12 +167,13 @@ public class PartidaQuiz extends PartidaBase {
     }
 
     public void finalizarDesempate() {
-        // Vencedor ganha a pontuação original empatada + 1 bônus, perdedor fica com 0
+        // Vencedor do desempate atira primeiro, ambos mantêm a pontuação empatada
         emDesempate = false;
         if (vencedorDesempate != null) {
+            // Dar +1 ao vencedor para garantir que atira primeiro na ordemTiro
             acertosRodada.put(vencedorDesempate, pontuacaoEmpatada + 1);
             String perdedor = vencedorDesempate.equals(jogador1) ? jogador2 : jogador1;
-            acertosRodada.put(perdedor, 0);
+            acertosRodada.put(perdedor, pontuacaoEmpatada);
         }
     }
 
