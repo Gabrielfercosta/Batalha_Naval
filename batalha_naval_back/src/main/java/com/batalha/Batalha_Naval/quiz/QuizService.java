@@ -182,15 +182,16 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
             partida.resolverPergunta();
         }
 
-        if (partida.isEmDesempate()) {
-            // Morte súbita — resolver diretamente sem mostrar RESULTADO separado
-            resolverDesempate(gameId);
-        } else {
-            messaging.convertAndSend("/topic/quiz/" + gameId, new ResultadoRodadaResponse(
-                    partida.getPerguntaAtual().getRespostaCorreta(),
-                    new HashMap<>(partida.getAcertouPergunta()),
-                    partida.getPerguntaIndice() + 1));
+        // Emitir RESULTADO sempre (rodada normal e desempate) para parar timer no frontend
+        messaging.convertAndSend("/topic/quiz/" + gameId, new ResultadoRodadaResponse(
+                partida.getPerguntaAtual().getRespostaCorreta(),
+                new HashMap<>(partida.getAcertouPergunta()),
+                partida.isEmDesempate() ? partida.getPerguntaDesempate() : partida.getPerguntaIndice() + 1));
 
+        if (partida.isEmDesempate()) {
+            // Morte súbita — mostrar resultado e depois resolver desempate com delay
+            agenda.schedule(() -> resolverDesempate(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
+        } else {
             if (partida.ultimaPergunta()) {
                 // Fim das perguntas normais — verificar se empatou
                 agenda.schedule(() -> verificarEmpate(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
@@ -298,13 +299,8 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
             agenda.schedule(() -> iniciarFaseTiros(gameId), DELAY_ENTRE_RODADAS_MS, TimeUnit.MILLISECONDS);
         } else {
             // Ambos acertaram ou ambos erraram — continuar morte súbita
-            Map<String, Object> evento = new HashMap<>();
-            evento.put("tipo", "DESEMPATE_CONTINUA");
-            evento.put("respostaCorreta", respostaCorreta);
-            evento.put("acertos", acertos);
-            evento.put("mensagem", "Empate continua! Próxima pergunta...");
-            messaging.convertAndSend("/topic/quiz/" + gameId, evento);
-            agenda.schedule(() -> iniciarPerguntaDesempate(gameId), DELAY_ENTRE_PERGUNTAS_MS, TimeUnit.MILLISECONDS);
+            // O RESULTADO já foi exibido antes com delay, então ir direto pra próxima pergunta
+            iniciarPerguntaDesempate(gameId);
         }
     }
 

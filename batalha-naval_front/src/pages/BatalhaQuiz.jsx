@@ -241,6 +241,7 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
             const oponente = nomeOponente(resultado.acertos);
             return (
                 <>
+                    {desempate && desempate.ativo && <span style={{ color: '#ffeb3b', fontWeight: 800, fontSize: 13 }}>⚡ MORTE SÚBITA</span>}
                     <h3 style={{ margin: 0 }}>Resposta certa: <b>{resultado.respostaCorreta}</b></h3>
                     <p style={{ margin: '6px 0 0' }}>
                         Você: {resultado.acertos[jogador] ? '✓' : '✗'} &nbsp;|&nbsp; {oponente || 'Oponente'}: {resultado.acertos[oponente] ? '✓' : '✗'}
