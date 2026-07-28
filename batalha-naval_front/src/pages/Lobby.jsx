@@ -181,54 +181,55 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada, aoIniciarQuiz }) {
     }
 
     return (
-        <div className="painel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, maxWidth: 520 }}>
-            <h2>Lobby</h2>
+        <div className="painel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, maxWidth: 520, maxHeight: '85vh', overflow: 'hidden' }}>
+            <h2 style={{ margin: '0 0 4px', fontSize: '1.4rem' }}>Lobby</h2>
 
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <button onClick={() => setModo('classico')} style={{ position: 'relative', opacity: modo === 'classico' ? 1 : 0.5 }}>
+                <button onClick={() => setModo('classico')} style={{ position: 'relative', opacity: modo === 'classico' ? 1 : 0.5, padding: '6px 16px', fontSize: 14 }}>
                     🚢 Clássico
                     <span className="badge-ajuda" onClick={(e) => { e.stopPropagation(); setAjuda('classico'); }}>?</span>
                 </button>
-                <button onClick={() => setModo('minada')} style={{ position: 'relative', opacity: modo === 'minada' ? 1 : 0.5 }}>
+                <button onClick={() => setModo('minada')} style={{ position: 'relative', opacity: modo === 'minada' ? 1 : 0.5, padding: '6px 16px', fontSize: 14 }}>
                     💣 Minada
                     <span className="badge-ajuda" onClick={(e) => { e.stopPropagation(); setAjuda('minada'); }}>?</span>
                 </button>
-                <button onClick={() => setModo('quiz')} style={{ position: 'relative', opacity: modo === 'quiz' ? 1 : 0.5 }}>
+                <button onClick={() => setModo('quiz')} style={{ position: 'relative', opacity: modo === 'quiz' ? 1 : 0.5, padding: '6px 16px', fontSize: 14 }}>
                     🧠 Quiz
                     <span className="badge-ajuda" onClick={(e) => { e.stopPropagation(); setAjuda('quiz'); }}>?</span>
                 </button>
             </div>
 
-            <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome da sala" />
-            <input value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Senha (opcional)" />
+            <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+                <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome da sala" style={{ flex: 1 }} />
+                <input value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Senha (opcional)" style={{ flex: 1 }} />
+            </div>
 
             {modo === 'quiz' && (
                 <div style={{ width: '100%' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap', margin: '4px 0' }}>
-                        <p style={{ margin: 0, fontSize: 14 }}>Categorias <span style={{ opacity: 0.6, fontSize: 12 }}>(clique pra desativar)</span></p>
-                        <button type="button" onClick={alternarTodasCategorias} style={{ margin: 0, padding: '4px 10px', fontSize: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap', margin: '2px 0' }}>
+                        <p style={{ margin: 0, fontSize: 12 }}>Categorias</p>
+                        <button type="button" onClick={alternarTodasCategorias} style={{ margin: 0, padding: '2px 8px', fontSize: 11 }}>
                             {todasMarcadas ? 'Desmarcar todas' : 'Marcar todas'}
                         </button>
                     </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
                         {CATEGORIAS.map((c) => (
-                            <button key={c.id} onClick={() => toggleCategoria(c.id)} style={{ fontSize: 12, padding: '4px 8px', margin: 0, opacity: categoriasAtivas.has(c.id) ? 1 : 0.35 }}>
+                            <button key={c.id} onClick={() => toggleCategoria(c.id)} style={{ fontSize: 11, padding: '2px 6px', margin: 0, opacity: categoriasAtivas.has(c.id) ? 1 : 0.35 }}>
                                 {c.nome}
                             </button>
                         ))}
                     </div>
-                    <p style={{ margin: '10px 0 4px', fontSize: 14 }}>Dificuldade</p>
-                    <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap', marginTop: 4 }}>
                         {DIFICULDADES.map((d) => (
-                            <button key={d.v} onClick={() => setDificuldade(d.v)} style={{ opacity: dificuldade === d.v ? 1 : 0.4 }}>
+                            <button key={d.v} onClick={() => setDificuldade(d.v)} style={{ opacity: dificuldade === d.v ? 1 : 0.4, padding: '4px 10px', fontSize: 12 }}>
                                 {d.nome}
                             </button>
                         ))}
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 12 }}>
+                            <input type="checkbox" checked={modoRapido} onChange={() => setModoRapido(!modoRapido)} />
+                            ⚡ Rápido
+                        </label>
                     </div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, cursor: 'pointer', fontSize: 14 }}>
-                        <input type="checkbox" checked={modoRapido} onChange={() => setModoRapido(!modoRapido)} />
-                        ⚡ Modo Rápido <span style={{ opacity: 0.6, fontSize: 12 }}>(dobro de tiros)</span>
-                    </label>
                 </div>
             )}
 
@@ -237,18 +238,20 @@ function Lobby({ jogador, aoIniciarPartida, aoIniciarMinada, aoIniciarQuiz }) {
                 <button onClick={carregarSalas}>Atualizar</button>
             </div>
 
-            {mensagem && <p style={{ color: 'var(--perigo)' }}>{mensagem}</p>}
+            {mensagem && <p style={{ color: 'var(--perigo)', margin: 0, fontSize: 13 }}>{mensagem}</p>}
 
-            <h3 style={{ fontSize: 20 }}>Salas abertas</h3>
-            {salas.length === 0 && <p>Nenhuma sala aberta.</p>}
-            <ul className="lista-salas">
-                {salas.map((sala) => (
-                    <li key={sala.gameId} className="sala-item">
-                        <span>{iconePorModo[sala.modo]} {sala.temSenha ? '🔒 ' : ''}{sala.nome} <span style={{ fontSize: 12, opacity: 0.7 }}>({sala.criador} · {sala.jogadores}/2)</span></span>
-                        <button onClick={() => entrar(sala)}>Entrar</button>
-                    </li>
-                ))}
-            </ul>
+            <h3 style={{ fontSize: 16, margin: '4px 0 2px' }}>Salas abertas</h3>
+            <div style={{ flex: 1, overflowY: 'auto', width: '100%', maxHeight: '25vh' }}>
+                {salas.length === 0 && <p style={{ textAlign: 'center', fontSize: 14 }}>Nenhuma sala aberta.</p>}
+                <ul className="lista-salas" style={{ margin: 0 }}>
+                    {salas.map((sala) => (
+                        <li key={sala.gameId} className="sala-item">
+                            <span>{iconePorModo[sala.modo]} {sala.temSenha ? '🔒 ' : ''}{sala.nome} <span style={{ fontSize: 12, opacity: 0.7 }}>({sala.criador} · {sala.jogadores}/2)</span></span>
+                            <button onClick={() => entrar(sala)} style={{ padding: '4px 14px', fontSize: 13 }}>Entrar</button>
+                        </li>
+                    ))}
+                </ul>
+            </div>
             {ajuda && (
                 <div className="modal-fundo" onClick={() => setAjuda(null)}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>

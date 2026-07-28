@@ -19,7 +19,7 @@ import java.time.Duration;
 public class RequestTimingFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(RequestTimingFilter.class);
-    private static final long SLOW_THRESHOLD_MS = 50;
+    private static final long SLOW_THRESHOLD_MS = 500;
 
     private final Timer requestTimer;
     private final Counter slowRequestCounter;
