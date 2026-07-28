@@ -519,9 +519,9 @@ input:focus {
 }
 
 .titulo-logo {
-  width: 13vw;
+  width: 9vw;
   height: auto;
-  margin: 4px 0 10px;
+  margin: 4px 0 6px;
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.3));
 }
 
