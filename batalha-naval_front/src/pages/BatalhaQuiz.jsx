@@ -187,7 +187,7 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
         if (status === 'FINALIZADA') {
             return (
                 <>
-                    <h2 style={{ margin: 0 }}>{vencedor === jogador ? 'Você venceu! 🏆' : 'Você perdeu! 💀'}</h2>
+                    <h2 style={{ margin: 0 }}>{vencedor === jogador ? 'Você venceu!' : 'Você perdeu!'}</h2>
                     <button onClick={voltarLobby} style={{ marginTop: 10 }}>Voltar ao Lobby</button>
                 </>
             );
@@ -216,7 +216,7 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
                         Você: {desempate.acertos[jogador] ? '✓' : '✗'} &nbsp;|&nbsp; {oponente || 'Oponente'}: {desempate.acertos[oponente] ? '✓' : '✗'}
                     </p>}
                     <h3 style={{ margin: 0, color: ganhou ? '#4caf50' : '#f44336' }}>
-                        {ganhou ? '🏅 Você venceu a morte súbita!' : `💀 ${desempate.vencedor} venceu a morte súbita!`}
+                        {ganhou ? 'Você venceu a morte súbita' : `${desempate.vencedor} venceu a morte súbita!`}
                     </h3>
                     <p style={{ margin: '6px 0 0', fontWeight: 600 }}>
                         {ganhou ? 'Você atira primeiro!' : `${desempate.vencedor} atira primeiro!`}

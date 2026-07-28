@@ -4,6 +4,7 @@ import com.batalha.Batalha_Naval.dto.CriarPartidaRequest;
 import com.batalha.Batalha_Naval.dto.EntrarPartidaRequest;
 import com.batalha.Batalha_Naval.dto.PosicionarNavioRequest;
 import com.batalha.Batalha_Naval.dto.SalaResponse;
+import io.micrometer.core.annotation.Timed;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/quiz")
 @AllArgsConstructor
+@Timed(value = "quiz.controller", description = "Tempo dos endpoints de quiz")
 public class QuizController {
 
     private final QuizService quizService;

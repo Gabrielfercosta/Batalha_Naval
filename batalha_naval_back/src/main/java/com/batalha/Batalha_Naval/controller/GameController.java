@@ -4,6 +4,7 @@ import com.batalha.Batalha_Naval.dominio.Partida;
 import com.batalha.Batalha_Naval.dominio.StatusPartida;
 import com.batalha.Batalha_Naval.dto.*;
 import com.batalha.Batalha_Naval.service.GameService;
+import io.micrometer.core.annotation.Timed;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/game")
 @AllArgsConstructor
+@Timed(value = "game.controller", description = "Tempo dos endpoints de jogo")
 public class GameController {
 
     private final GameService gameService;

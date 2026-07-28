@@ -3,6 +3,8 @@ package com.batalha.Batalha_Naval.service;
 import com.batalha.Batalha_Naval.dominio.PartidaBase;
 import com.batalha.Batalha_Naval.dominio.StatusPartida;
 import com.batalha.Batalha_Naval.dto.SalaResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.ArrayList;
@@ -13,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class ServicoPartidaBase<T extends PartidaBase> {
 
+    private static final Logger log = LoggerFactory.getLogger(ServicoPartidaBase.class);
+
     protected final Map<String, T> partidas = new ConcurrentHashMap<>();
 
     protected abstract T novaPartida(String jogador, String nome, String senha);
@@ -20,6 +24,7 @@ public abstract class ServicoPartidaBase<T extends PartidaBase> {
     public String criarPartida(String jogador, String nome, String senha) {
         String id = UUID.randomUUID().toString();
         partidas.put(id, novaPartida(jogador, nome, senha));
+        log.info("Partida criada: id={}, jogador={}", id, jogador);
         return id;
     }
 
@@ -34,6 +39,7 @@ public abstract class ServicoPartidaBase<T extends PartidaBase> {
     public T entrarNaPartida(String gameId, String jogador, String senha) {
         T partida = buscarPartida(gameId);
         partida.entrar(jogador, senha);
+        log.info("Jogador entrou: partida={}, jogador={}", gameId, jogador);
         return partida;
     }
 
