@@ -5,6 +5,8 @@ import com.batalha.Batalha_Naval.dominio.StatusPartida;
 import com.batalha.Batalha_Naval.dto.SalaResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.ArrayList;
@@ -21,6 +23,11 @@ public abstract class ServicoPartidaBase<T extends PartidaBase> {
 
     protected abstract T novaPartida(String jogador, String nome, String senha);
 
+    /**
+     * A chave do cache inclui o nome da classe concreta para que cada modo de jogo
+     * (clássico, minado, quiz) tenha sua própria entrada.
+     */
+    @CacheEvict(value = "salas-abertas", key = "#root.targetClass.simpleName")
     public String criarPartida(String jogador, String nome, String senha) {
         String id = UUID.randomUUID().toString();
         partidas.put(id, novaPartida(jogador, nome, senha));
@@ -36,6 +43,7 @@ public abstract class ServicoPartidaBase<T extends PartidaBase> {
         return partida;
     }
 
+    @CacheEvict(value = "salas-abertas", key = "#root.targetClass.simpleName")
     public T entrarNaPartida(String gameId, String jogador, String senha) {
         T partida = buscarPartida(gameId);
         partida.entrar(jogador, senha);
@@ -49,6 +57,7 @@ public abstract class ServicoPartidaBase<T extends PartidaBase> {
         return partida;
     }
 
+    @CacheEvict(value = "salas-abertas", key = "#root.targetClass.simpleName")
     public T sairDaPartida(String gameId, String jogador) {
         T partida = partidas.get(gameId);
         if (partida == null) return null;
@@ -69,6 +78,11 @@ public abstract class ServicoPartidaBase<T extends PartidaBase> {
         return null;
     }
 
+    /**
+     * Endpoint consultado a cada 5 segundos pelo frontend de cada jogador no lobby.
+     * O cache evita varrer o mapa de partidas a cada requisição.
+     */
+    @Cacheable(value = "salas-abertas", key = "#root.targetClass.simpleName")
     public List<SalaResponse> listarPartidasAbertas() {
         List<SalaResponse> abertas = new ArrayList<>();
         for (Map.Entry<String, T> entrada : partidas.entrySet()) {

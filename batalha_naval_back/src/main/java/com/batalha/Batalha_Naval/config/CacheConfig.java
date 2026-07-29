@@ -30,8 +30,7 @@ public class CacheConfig {
                 .cacheDefaults(config)
                 .withCacheConfiguration("salas-abertas",
                         config.entryTtl(Duration.ofSeconds(5)))
-                .withCacheConfiguration("trivia-perguntas",
-                        config.entryTtl(Duration.ofMinutes(30)))
+                .enableStatistics() // Necessário para o Micrometer expor hits/misses no Prometheus
                 .build();
     }
 }

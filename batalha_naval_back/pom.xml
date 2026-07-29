@@ -108,6 +108,13 @@
 			<artifactId>opentelemetry-exporter-otlp</artifactId>
 		</dependency>
 
+		<!-- Observabilidade: instrumentação de queries JDBC (spans por query + detecção de queries lentas) -->
+		<dependency>
+			<groupId>net.ttddyy.observation</groupId>
+			<artifactId>datasource-micrometer-spring-boot</artifactId>
+			<version>1.0.6</version>
+		</dependency>
+
 		<!-- Observabilidade: Logging estruturado (JSON) -->
 		<dependency>
 			<groupId>net.logstash.logback</groupId>

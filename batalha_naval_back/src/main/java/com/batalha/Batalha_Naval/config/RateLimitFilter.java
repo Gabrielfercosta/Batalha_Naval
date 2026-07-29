@@ -65,7 +65,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
+        // Não aplicar rate limit em WebSocket e Actuator (scrape do Prometheus)
         String uri = request.getRequestURI();
-        return uri.startsWith("/ws");
+        return uri.startsWith("/ws") || uri.startsWith("/actuator");
     }
 }
