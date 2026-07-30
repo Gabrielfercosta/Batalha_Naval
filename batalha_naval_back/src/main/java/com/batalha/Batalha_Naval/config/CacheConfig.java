@@ -1,6 +1,9 @@
 package com.batalha.Batalha_Naval.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -15,8 +18,12 @@ import java.time.Duration;
 @EnableCaching
 public class CacheConfig {
 
+    /**
+     * Cache Redis — usado quando CACHE_TYPE=redis (ambiente com Redis disponível).
+     */
     @Bean
-    public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+    @ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
+    public CacheManager redisCacheManager(RedisConnectionFactory connectionFactory) {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofSeconds(10))
                 .serializeValuesWith(
@@ -30,7 +37,16 @@ public class CacheConfig {
                 .cacheDefaults(config)
                 .withCacheConfiguration("salas-abertas",
                         config.entryTtl(Duration.ofSeconds(5)))
-                .enableStatistics() // Necessário para o Micrometer expor hits/misses no Prometheus
+                .enableStatistics() // Necessário para o Micrometer expor hits/misses
                 .build();
+    }
+
+    /**
+     * Cache em memória — fallback para ambientes sem Redis (ex.: deploy no Render).
+     */
+    @Bean
+    @ConditionalOnProperty(name = "spring.cache.type", havingValue = "simple", matchIfMissing = true)
+    public CacheManager simpleCacheManager() {
+        return new ConcurrentMapCacheManager("salas-abertas");
     }
 }
