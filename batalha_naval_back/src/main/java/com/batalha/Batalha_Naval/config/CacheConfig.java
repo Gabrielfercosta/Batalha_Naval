@@ -1,9 +1,10 @@
 package com.batalha.Batalha_Naval.config;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -13,13 +14,25 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
+/**
+ * A lista de salas abertas é consultada a cada 5 segundos por cada jogador no lobby.
+ * O cache evita varrer o mapa de partidas em cada requisição.
+ *
+ * O TTL curto (5s) é essencial: é ele que garante que uma sala recém-criada apareça
+ * para os outros jogadores mesmo quando o @CacheEvict não dispara — o que acontece
+ * nos modos quiz e minado, onde criarPartida() é chamado internamente pelo próprio
+ * serviço e portanto não passa pelo proxy do Spring.
+ */
 @Configuration
 @EnableCaching
 public class CacheConfig {
 
+    private static final Duration TTL_SALAS = Duration.ofSeconds(5);
+
     /**
-     * Cache Redis — usado quando CACHE_TYPE=redis (ambiente com Redis disponível).
+     * Cache Redis — usado quando CACHE_TYPE=redis (Docker Compose, Kubernetes).
      */
     @Bean
     @ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
@@ -35,18 +48,24 @@ public class CacheConfig {
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
-                .withCacheConfiguration("salas-abertas",
-                        config.entryTtl(Duration.ofSeconds(5)))
+                .withCacheConfiguration("salas-abertas", config.entryTtl(TTL_SALAS))
                 .enableStatistics() // Necessário para o Micrometer expor hits/misses
                 .build();
     }
 
     /**
-     * Cache em memória — fallback para ambientes sem Redis (ex.: deploy no Render).
+     * Cache em memória com TTL — fallback para ambientes sem Redis (ex.: Render).
+     * Usa Caffeine em vez de ConcurrentMapCacheManager porque este último não
+     * expira entradas, o que deixaria a lista de salas congelada.
      */
     @Bean
     @ConditionalOnProperty(name = "spring.cache.type", havingValue = "simple", matchIfMissing = true)
-    public CacheManager simpleCacheManager() {
-        return new ConcurrentMapCacheManager("salas-abertas");
+    public CacheManager caffeineCacheManager() {
+        CaffeineCacheManager manager = new CaffeineCacheManager("salas-abertas");
+        manager.setCaffeine(Caffeine.newBuilder()
+                .expireAfterWrite(TTL_SALAS.toSeconds(), TimeUnit.SECONDS)
+                .maximumSize(100)
+                .recordStats()); // Expõe hits/misses no Micrometer
+        return manager;
     }
 }

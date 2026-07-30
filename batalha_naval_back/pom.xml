@@ -131,6 +131,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-cache</artifactId>
 		</dependency>
+		<!-- Cache em memória com TTL, usado quando não há Redis disponível -->
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+		</dependency>
 
 		<!-- Rate Limiting: Bucket4j -->
 		<dependency>

@@ -48,6 +48,12 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
         return new PartidaQuiz(jogador, nome, senha);
     }
 
+    /**
+     * O @CacheEvict precisa estar aqui, e não apenas no criarPartida() herdado:
+     * a chamada interna abaixo não passa pelo proxy do Spring, então o evict da
+     * classe base não dispararia e a sala nova não apareceria na listagem.
+     */
+    @org.springframework.cache.annotation.CacheEvict(value = "salas-abertas", key = "#root.targetClass.simpleName")
     public String criarPartidaQuiz(String jogador, String nome, String senha, List<String> categorias, String dificuldade, boolean modoRapido) {
         String gameId = criarPartida(jogador, nome, senha);
         buscarPartida(gameId).configurar(categorias, dificuldade, modoRapido);
