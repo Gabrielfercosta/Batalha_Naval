@@ -1,5 +1,6 @@
 package com.batalha.Batalha_Naval.minado;
 
+import com.batalha.Batalha_Naval.config.GameplayMetrics;
 import com.batalha.Batalha_Naval.dto.ErroResponse;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -18,11 +19,14 @@ public class MinadoWebSocketController {
 
     private final MinadoService minadoService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final GameplayMetrics gameplayMetrics;
 
     public MinadoWebSocketController(MinadoService minadoService,
-                                     SimpMessagingTemplate messagingTemplate) {
+                                     SimpMessagingTemplate messagingTemplate,
+                                     GameplayMetrics gameplayMetrics) {
         this.minadoService = minadoService;
         this.messagingTemplate = messagingTemplate;
+        this.gameplayMetrics = gameplayMetrics;
     }
 
     @MessageMapping("/minado/{gameId}/tiro")
@@ -42,6 +46,7 @@ public class MinadoWebSocketController {
             }
 
             ResultadoTiroMinado resultado = minadoService.atirar(gameId, jogador, linha, coluna);
+            gameplayMetrics.registrarTiroMinado(resultado.name());
 
             List<CasaRevelada> novas = new ArrayList<>();
             for (int[] pos : oponente.casasReveladas()) {

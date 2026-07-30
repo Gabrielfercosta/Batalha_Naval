@@ -1,5 +1,6 @@
 package com.batalha.Batalha_Naval.quiz;
 
+import com.batalha.Batalha_Naval.config.GameplayMetrics;
 import com.batalha.Batalha_Naval.dominio.Coordenada;
 import com.batalha.Batalha_Naval.dominio.Direcao;
 import com.batalha.Batalha_Naval.dominio.FabricaNavio;
@@ -30,14 +31,16 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
     private static final long DELAY_ENTRE_RODADAS_MS = 3000;
     private final TriviaService triviaService;
     private final SimpMessagingTemplate messaging;
+    private final GameplayMetrics gameplayMetrics;
     private final ScheduledExecutorService agenda = Executors.newSingleThreadScheduledExecutor();
     private final Map<String, Set<String>> chegaram = new ConcurrentHashMap<>();
     private final Set<String> iniciados = ConcurrentHashMap.newKeySet();
     private final Map<String, ScheduledFuture<?>> timers = new ConcurrentHashMap<>();
 
-    public QuizService(TriviaService triviaService, SimpMessagingTemplate messaging) {
+    public QuizService(TriviaService triviaService, SimpMessagingTemplate messaging, GameplayMetrics gameplayMetrics) {
         this.triviaService = triviaService;
         this.messaging = messaging;
+        this.gameplayMetrics = gameplayMetrics;
     }
 
     @Override
@@ -100,6 +103,8 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
         ResultadoTiro resultado;
         NavioRevelado navioAfundado = null;
         synchronized (partida) {
+            resultado = partida.atirar(jogador, tiro);
+            gameplayMetrics.registrarTiroQuiz();
             resultado = partida.atirar(jogador, tiro);
             if (resultado == ResultadoTiro.AFUNDADO) {
                 Navio navio = partida.navioAfundadoEm(jogador, tiro);
@@ -180,6 +185,13 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
                 return;
             }
             partida.resolverPergunta();
+        }
+
+        // Registrar métricas de respostas
+        for (Map.Entry<String, Boolean> entry : partida.getAcertouPergunta().entrySet()) {
+            gameplayMetrics.registrarRespostaQuiz(entry.getValue());
+            gameplayMetrics.registrarRespostaPorDificuldade(
+                    partida.getPerguntaAtual().getDificuldade(), entry.getValue());
         }
 
         // Emitir RESULTADO sempre (rodada normal e desempate) para parar timer no frontend

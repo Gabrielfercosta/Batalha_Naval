@@ -1,5 +1,6 @@
 package com.batalha.Batalha_Naval.minado;
 
+import com.batalha.Batalha_Naval.config.PartidasMetrics;
 import com.batalha.Batalha_Naval.dominio.StatusPartida;
 import com.batalha.Batalha_Naval.dto.CriarPartidaRequest;
 import com.batalha.Batalha_Naval.dto.EntrarPartidaRequest;
@@ -16,15 +17,18 @@ public class MinadoController {
 
     private final MinadoService minadoService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final PartidasMetrics partidasMetrics;
 
-    public MinadoController(MinadoService minadoService, SimpMessagingTemplate messagingTemplate) {
+    public MinadoController(MinadoService minadoService, SimpMessagingTemplate messagingTemplate, PartidasMetrics partidasMetrics) {
         this.minadoService = minadoService;
         this.messagingTemplate = messagingTemplate;
+        this.partidasMetrics = partidasMetrics;
     }
 
     @PostMapping("/create")
     public PartidaMinadaResponse criar(@RequestBody CriarPartidaRequest request, Principal principal) {
         String gameId = minadoService.criarPartida(principal.getName(), request.getNome(), request.getSenha());
+        partidasMetrics.partidaCriada("minado");
         return new PartidaMinadaResponse(gameId, minadoService.buscarPartida(gameId));
     }
 

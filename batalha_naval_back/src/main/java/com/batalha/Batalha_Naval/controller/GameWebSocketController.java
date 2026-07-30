@@ -1,5 +1,6 @@
 package com.batalha.Batalha_Naval.controller;
 
+import com.batalha.Batalha_Naval.config.GameplayMetrics;
 import com.batalha.Batalha_Naval.dominio.Coordenada;
 import com.batalha.Batalha_Naval.dominio.Partida;
 import com.batalha.Batalha_Naval.dominio.ResultadoTiro;
@@ -22,6 +23,7 @@ public class GameWebSocketController {
 
     private final GameService gameService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final GameplayMetrics gameplayMetrics;
 
     @MessageMapping("/game/{gameId}/tiro")
     public void atirar(@DestinationVariable String gameId, TiroRequest request, Principal principal) {
@@ -30,6 +32,7 @@ public class GameWebSocketController {
             Coordenada tiro = new Coordenada(request.getLinha(), request.getColuna());
 
             ResultadoTiro resultado = gameService.atirar(gameId, jogador, tiro);
+            gameplayMetrics.registrarTiroClassico(resultado.name());
 
             Partida partida = gameService.buscarPartida(gameId);
 

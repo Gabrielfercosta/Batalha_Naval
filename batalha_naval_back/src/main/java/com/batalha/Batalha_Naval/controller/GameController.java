@@ -1,5 +1,6 @@
 package com.batalha.Batalha_Naval.controller;
 
+import com.batalha.Batalha_Naval.config.PartidasMetrics;
 import com.batalha.Batalha_Naval.dominio.Partida;
 import com.batalha.Batalha_Naval.dominio.StatusPartida;
 import com.batalha.Batalha_Naval.dto.*;
@@ -20,10 +21,12 @@ public class GameController {
 
     private final GameService gameService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final PartidasMetrics partidasMetrics;
 
     @PostMapping("/create")
     public PartidaResponse criar(@RequestBody CriarPartidaRequest request, Principal principal) {
         String gameId = gameService.criarPartida(principal.getName(), request.getNome(), request.getSenha());
+        partidasMetrics.partidaCriada("classico");
         Partida partida = gameService.buscarPartida(gameId);
         return new PartidaResponse(gameId, partida);
     }

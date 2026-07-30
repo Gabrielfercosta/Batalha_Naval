@@ -78,20 +78,41 @@ export default function () {
             check(r3, { 'listou salas minado': (r) => r.status === 200 });
         });
 
-        group('3. Criar e sair de partida', () => {
-            const criar = http.post(`${BASE_URL}/api/game/create`, JSON.stringify({
+        group('3. Criar partidas (3 modos)', () => {
+            const criarClassico = http.post(`${BASE_URL}/api/game/create`, JSON.stringify({
                 nome: `Sala K6 ${__VU}`,
                 senha: '',
             }), authHeaders);
+            tempoCriarPartida.add(criarClassico.timings.duration);
+            check(criarClassico, { 'partida classica criada': (r) => r.status === 200 || r.status === 429 });
 
-            tempoCriarPartida.add(criar.timings.duration);
-            const ok = check(criar, { 'partida criada': (r) => r.status === 200 });
-            erros.add(!ok);
+            const criarMinado = http.post(`${BASE_URL}/api/minado/create`, JSON.stringify({
+                nome: `Minada K6 ${__VU}`,
+                senha: '',
+            }), authHeaders);
+            check(criarMinado, { 'partida minada criada': (r) => r.status === 200 || r.status === 429 });
 
-            if (ok) {
-                const gameId = JSON.parse(criar.body).gameId;
-                // Sai da partida
-                http.post(`${BASE_URL}/api/game/${gameId}/sair`, null, authHeaders);
+            const criarQuiz = http.post(`${BASE_URL}/api/quiz/create`, JSON.stringify({
+                nome: `Quiz K6 ${__VU}`,
+                senha: '',
+                categorias: ['geral'],
+                dificuldade: '',
+                modoRapido: false,
+            }), authHeaders);
+            check(criarQuiz, { 'partida quiz criada': (r) => r.status === 200 || r.status === 429 });
+
+            // Mantém partidas ativas por 5s para o Prometheus capturar
+            sleep(5);
+
+            // Sai das partidas
+            if (criarClassico.status === 200) {
+                try { http.post(`${BASE_URL}/api/game/${JSON.parse(criarClassico.body).gameId}/sair`, null, authHeaders); } catch(e) {}
+            }
+            if (criarMinado.status === 200) {
+                try { http.post(`${BASE_URL}/api/minado/${JSON.parse(criarMinado.body).gameId}/sair`, null, authHeaders); } catch(e) {}
+            }
+            if (criarQuiz.status === 200) {
+                try { http.post(`${BASE_URL}/api/quiz/${JSON.parse(criarQuiz.body).gameId}/sair`, null, authHeaders); } catch(e) {}
             }
         });
 

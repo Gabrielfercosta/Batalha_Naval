@@ -1,5 +1,6 @@
 package com.batalha.Batalha_Naval.quiz;
 
+import com.batalha.Batalha_Naval.config.PartidasMetrics;
 import com.batalha.Batalha_Naval.dto.CriarPartidaRequest;
 import com.batalha.Batalha_Naval.dto.EntrarPartidaRequest;
 import com.batalha.Batalha_Naval.dto.PosicionarNavioRequest;
@@ -24,12 +25,14 @@ public class QuizController {
 
     private final QuizService quizService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final PartidasMetrics partidasMetrics;
 
     @PostMapping("/create")
     public PartidaQuizResponse criar(@RequestBody CriarQuizRequest request, Principal principal) {
         String gameId = quizService.criarPartidaQuiz(
                 principal.getName(), request.getNome(), request.getSenha(),
                 request.getCategorias(), request.getDificuldade(), request.isModoRapido());
+        partidasMetrics.partidaCriada("quiz");
         return new PartidaQuizResponse(gameId, quizService.buscarPartida(gameId));
     }
 

@@ -292,12 +292,16 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "semi-dark-green",
                 "value": null
               },
               {
+                "color": "#EAB839",
+                "value": 5
+              },
+              {
                 "color": "red",
-                "value": 80
+                "value": 10
               }
             ]
           }
@@ -312,7 +316,7 @@
       },
       "id": 3,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background_solid",
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -343,17 +347,33 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "semi-dark-red",
+                  "index": 1,
+                  "text": "OFFLINE"
+                },
+                "1": {
+                  "color": "semi-dark-green",
+                  "index": 0,
+                  "text": "ONLINE"
+                }
+              },
+              "type": "value"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "semi-dark-red",
                 "value": null
               },
               {
-                "color": "red",
-                "value": 80
+                "color": "semi-dark-green",
+                "value": 1
               }
             ]
           }
@@ -368,8 +388,8 @@
       },
       "id": 6,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
+        "colorMode": "background_solid",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "percentChangeColorMode": "standard",
@@ -599,6 +619,6 @@
   "timezone": "",
   "title": "Batalha Naval - Observabilidade",
   "uid": "batalha-naval-dash",
-  "version": 3,
+  "version": 4,
   "weekStart": ""
 }

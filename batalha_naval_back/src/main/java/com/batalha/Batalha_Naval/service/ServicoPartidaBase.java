@@ -43,6 +43,10 @@ public abstract class ServicoPartidaBase<T extends PartidaBase> {
         return partida;
     }
 
+    public int totalPartidas() {
+        return partidas.size();
+    }
+
     @CacheEvict(value = "salas-abertas", key = "#root.targetClass.simpleName")
     public T entrarNaPartida(String gameId, String jogador, String senha) {
         T partida = buscarPartida(gameId);

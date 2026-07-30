@@ -20,7 +20,9 @@ class QuizServiceTest {
     void setUp() {
         TriviaService triviaService = new TriviaService();
         messaging = mock(SimpMessagingTemplate.class);
-        quizService = new QuizService(triviaService, messaging);
+        io.micrometer.core.instrument.MeterRegistry registry = new io.micrometer.core.instrument.simple.SimpleMeterRegistry();
+        com.batalha.Batalha_Naval.config.GameplayMetrics gameplayMetrics = new com.batalha.Batalha_Naval.config.GameplayMetrics(registry);
+        quizService = new QuizService(triviaService, messaging, gameplayMetrics);
     }
 
     @Test
