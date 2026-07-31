@@ -117,7 +117,6 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
         synchronized (partida) {
             resultado = partida.atirar(jogador, tiro);
             gameplayMetrics.registrarTiroQuiz();
-            resultado = partida.atirar(jogador, tiro);
             if (resultado == ResultadoTiro.AFUNDADO) {
                 Navio navio = partida.navioAfundadoEm(jogador, tiro);
                 if (navio != null) {
