@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { conectarQuiz, responderQuiz, atirarQuiz } from '../ws/socket';
-import { buscarPartidaQuiz } from '../api/api';
+import { buscarPartidaQuiz, sincronizarPartida } from '../api/api';
 import { tocarSom, tocarMusica } from '../audio/musica';
 import { estiloNavio as estiloNavioBase, SPRITES_POR_TIPO as SPRITES } from '../utils/navios';
 
@@ -111,8 +111,20 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
     }, [status, vencedor]);
 
     useEffect(() => {
-        buscarPartidaQuiz(gameId).then((p) => setStatus(p.status));
-    }, [gameId]);
+        let ativo = true;
+        const aplicar = (p) => { if (ativo) setStatus(p.status); };
+
+        sincronizarPartida(buscarPartidaQuiz, gameId, aplicar);
+
+        // Rede de segurança caso o evento de início não chegue pelo WebSocket.
+        const intervalo = setInterval(() => {
+            if (ativo && (status === 'AGUARDANDO' || status === 'POSICIONANDO')) {
+                sincronizarPartida(buscarPartidaQuiz, gameId, aplicar, 1);
+            }
+        }, 3000);
+
+        return () => { ativo = false; clearInterval(intervalo); };
+    }, [gameId, status]);
 
     useEffect(() => {
         if (status !== 'FINALIZADA') return;

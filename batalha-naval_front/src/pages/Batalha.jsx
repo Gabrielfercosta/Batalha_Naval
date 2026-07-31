@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { conectar, atirar } from '../ws/socket';
-import { buscarPartida } from '../api/api';
+import { buscarPartida, sincronizarPartida } from '../api/api';
 import { tocarMusica, tocarSom } from '../audio/musica';
 import { estiloNavio as estiloNavioBase, ESPESSURA } from '../utils/navios';
 
@@ -73,12 +73,32 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
     }, [status, vencedor]);
 
     useEffect(() => {
-        buscarPartida(gameId).then((p) => {
+        let ativo = true;
+
+        function aplicar(p) {
+            if (!ativo) return;
             setTurno(p.turnoAtual);
             setStatus(p.status);
             setVencedor(p.vencedor);
-        });
-    }, [gameId]);
+        }
+
+        sincronizarPartida(buscarPartida, gameId, aplicar);
+
+        // Rede de segurança: se a notificação de início pelo WebSocket não chegar
+        // (cliente ainda não inscrito, queda de conexão), o estado é reconsultado
+        // até a partida sair de POSICIONANDO/AGUARDANDO.
+        const intervalo = setInterval(() => {
+            if (!ativo) return;
+            if (status === 'POSICIONANDO' || status === 'AGUARDANDO') {
+                sincronizarPartida(buscarPartida, gameId, aplicar, 1);
+            }
+        }, 3000);
+
+        return () => {
+            ativo = false;
+            clearInterval(intervalo);
+        };
+    }, [gameId, status]);
 
     useEffect(() => {
         if (status !== 'FINALIZADA') return;

@@ -32,6 +32,32 @@ export function registrar(username, senha) {
     return pedir(`${AUTH_BASE}/register`, 'POST', { username, senha }, false);
 }
 
+/**
+ * Busca o estado da partida insistindo em caso de falha transitória.
+ *
+ * As telas de batalha dependem desta chamada para descobrir de quem é o turno.
+ * Sem repetição, uma única falha de rede (ou um 429 do rate limiting) deixava o
+ * jogador presoem "Esperando o outro jogador..." para sempre, porque o .then()
+ * nunca executava e nada tentava de novo.
+ */
+export async function sincronizarPartida(buscar, gameId, aoObter, tentativas = 5) {
+    for (let tentativa = 0; tentativa < tentativas; tentativa++) {
+        try {
+            const partida = await buscar(gameId);
+            aoObter(partida);
+            return partida;
+        } catch (e) {
+            const ultima = tentativa === tentativas - 1;
+            if (ultima) {
+                console.warn('Não consegui sincronizar o estado da partida:', e.message);
+                return null;
+            }
+            await new Promise((r) => setTimeout(r, 800 * (tentativa + 1)));
+        }
+    }
+    return null;
+}
+
 export function logar(username, senha) {
     return pedir(`${AUTH_BASE}/login`, 'POST', { username, senha }, false);
 }

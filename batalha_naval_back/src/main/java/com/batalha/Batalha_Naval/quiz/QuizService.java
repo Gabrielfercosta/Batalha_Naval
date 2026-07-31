@@ -60,7 +60,13 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
         return gameId;
     }
 
+    /**
+     * Assim como em criarPartidaQuiz, o evict precisa estar aqui: a chamada a
+     * super.sairDaPartida() não passa pelo proxy do Spring, então a anotação da
+     * classe base não dispara e a sala continuaria listada após o jogador sair.
+     */
     @Override
+    @org.springframework.cache.annotation.CacheEvict(value = "salas-abertas", key = "#root.targetClass.simpleName")
     public PartidaQuiz sairDaPartida(String gameId, String jogador) {
         PartidaQuiz partida = super.sairDaPartida(gameId, jogador);
         if (partida != null && partida.getStatus() == StatusPartida.FINALIZADA) {
@@ -186,14 +192,22 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
         if (partida == null || partida.getStatus() != StatusPartida.EM_ANDAMENTO) {
             return;
         }
+
+        // Os dados usados depois são copiados dentro do lock: acertouPergunta é o mapa
+        // real da partida e responder() escreve nele a qualquer momento. Iterar sobre
+        // ele fora do lock quebra com ConcurrentModificationException e interrompe
+        // este método antes de emitir o RESULTADO, travando a partida.
+        Map<String, Boolean> acertos;
+        String dificuldade;
         synchronized (partida) {
             if (partida.isResolvida()) {
                 return;
             }
             partida.resolverPergunta();
+            acertos = new HashMap<>(partida.getAcertouPergunta());
+            dificuldade = partida.getPerguntaAtual().getDificuldade();
         }
 
-        // Registrar métricas de respostas
         for (Map.Entry<String, Boolean> entry : partida.getAcertouPergunta().entrySet()) {
             gameplayMetrics.registrarRespostaQuiz(entry.getValue());
             gameplayMetrics.registrarRespostaPorDificuldade(
@@ -203,7 +217,7 @@ public class QuizService extends ServicoPartidaBase<PartidaQuiz> {
         // Emitir RESULTADO sempre (rodada normal e desempate) para parar timer no frontend
         messaging.convertAndSend("/topic/quiz/" + gameId, new ResultadoRodadaResponse(
                 partida.getPerguntaAtual().getRespostaCorreta(),
-                new HashMap<>(partida.getAcertouPergunta()),
+                acertos,
                 partida.isEmDesempate() ? partida.getPerguntaDesempate() : partida.getPerguntaIndice() + 1));
 
         if (partida.isEmDesempate()) {

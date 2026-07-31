@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { conectarMinado, atirarMinado } from '../ws/socket';
-import { buscarPartidaMinada } from '../api/api';
+import { buscarPartidaMinada, sincronizarPartida } from '../api/api';
 import { tocarMusica, tocarSom } from '../audio/musica';
 import { estiloNavio as estiloNavioBase } from '../utils/navios';
 
@@ -110,11 +110,24 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
     }, [status, vencedor]);
 
     useEffect(() => {
-        buscarPartidaMinada(gameId).then((p) => {
+        let ativo = true;
+        const aplicar = (p) => {
+            if (!ativo) return;
             setTurno(p.turnoAtual);
             setStatus(p.status);
-        });
-    }, [gameId]);
+        };
+
+        sincronizarPartida(buscarPartidaMinada, gameId, aplicar);
+
+        // Rede de segurança caso o evento de início não chegue pelo WebSocket.
+        const intervalo = setInterval(() => {
+            if (ativo && (status === 'POSICIONANDO' || status === 'AGUARDANDO')) {
+                sincronizarPartida(buscarPartidaMinada, gameId, aplicar, 1);
+            }
+        }, 3000);
+
+        return () => { ativo = false; clearInterval(intervalo); };
+    }, [gameId, status]);
 
     function clicarInimigo(linha, coluna) {
         if (contagem !== null) return;
