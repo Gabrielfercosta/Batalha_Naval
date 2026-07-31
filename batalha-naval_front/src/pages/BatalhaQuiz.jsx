@@ -112,19 +112,24 @@ function BatalhaQuiz({ jogador, gameId, meusNavios, voltarLobby }) {
 
     useEffect(() => {
         let ativo = true;
-        const aplicar = (p) => { if (ativo) setStatus(p.status); };
 
-        sincronizarPartida(buscarPartidaQuiz, gameId, aplicar);
+        sincronizarPartida(buscarPartidaQuiz, gameId, (p) => {
+            if (ativo) setStatus(p.status);
+        });
 
-        // Rede de segurança caso o evento de início não chegue pelo WebSocket.
         const intervalo = setInterval(() => {
-            if (ativo && (status === 'AGUARDANDO' || status === 'POSICIONANDO')) {
-                sincronizarPartida(buscarPartidaQuiz, gameId, aplicar, 1);
-            }
+            if (!ativo) return;
+            buscarPartidaQuiz(gameId).then((p) => {
+                if (!ativo) return;
+                if (p.status === 'EM_ANDAMENTO' || p.status === 'FINALIZADA') {
+                    setStatus(p.status);
+                    clearInterval(intervalo);
+                }
+            }).catch(() => {});
         }, 3000);
 
         return () => { ativo = false; clearInterval(intervalo); };
-    }, [gameId, status]);
+    }, [gameId]);
 
     useEffect(() => {
         if (status !== 'FINALIZADA') return;

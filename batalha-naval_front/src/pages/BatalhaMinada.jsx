@@ -111,23 +111,27 @@ function BatalhaMinada({ jogador, gameId, meusNavios, minhasMinas, voltarLobby }
 
     useEffect(() => {
         let ativo = true;
-        const aplicar = (p) => {
+
+        sincronizarPartida(buscarPartidaMinada, gameId, (p) => {
             if (!ativo) return;
             setTurno(p.turnoAtual);
             setStatus(p.status);
-        };
+        });
 
-        sincronizarPartida(buscarPartidaMinada, gameId, aplicar);
-
-        // Rede de segurança caso o evento de início não chegue pelo WebSocket.
         const intervalo = setInterval(() => {
-            if (ativo && (status === 'POSICIONANDO' || status === 'AGUARDANDO')) {
-                sincronizarPartida(buscarPartidaMinada, gameId, aplicar, 1);
-            }
+            if (!ativo) return;
+            buscarPartidaMinada(gameId).then((p) => {
+                if (!ativo) return;
+                if (p.status === 'EM_ANDAMENTO' || p.status === 'FINALIZADA') {
+                    setTurno(p.turnoAtual);
+                    setStatus(p.status);
+                    clearInterval(intervalo);
+                }
+            }).catch(() => {});
         }, 3000);
 
         return () => { ativo = false; clearInterval(intervalo); };
-    }, [gameId, status]);
+    }, [gameId]);
 
     function clicarInimigo(linha, coluna) {
         if (contagem !== null) return;

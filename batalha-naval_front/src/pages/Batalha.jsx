@@ -75,30 +75,33 @@ function Batalha({ jogador, gameId, meusNavios, voltarLobby }) {
     useEffect(() => {
         let ativo = true;
 
-        function aplicar(p) {
+        sincronizarPartida(buscarPartida, gameId, (p) => {
             if (!ativo) return;
             setTurno(p.turnoAtual);
             setStatus(p.status);
             setVencedor(p.vencedor);
-        }
+        });
 
-        sincronizarPartida(buscarPartida, gameId, aplicar);
-
-        // Rede de segurança: se a notificação de início pelo WebSocket não chegar
-        // (cliente ainda não inscrito, queda de conexão), o estado é reconsultado
-        // até a partida sair de POSICIONANDO/AGUARDANDO.
+        // Rede de segurança: se a notificação WebSocket não chegar,
+        // reconsulta até a partida sair de POSICIONANDO/AGUARDANDO.
         const intervalo = setInterval(() => {
             if (!ativo) return;
-            if (status === 'POSICIONANDO' || status === 'AGUARDANDO') {
-                sincronizarPartida(buscarPartida, gameId, aplicar, 1);
-            }
+            buscarPartida(gameId).then((p) => {
+                if (!ativo) return;
+                if (p.status === 'EM_ANDAMENTO' || p.status === 'FINALIZADA') {
+                    setTurno(p.turnoAtual);
+                    setStatus(p.status);
+                    setVencedor(p.vencedor);
+                    clearInterval(intervalo);
+                }
+            }).catch(() => {});
         }, 3000);
 
         return () => {
             ativo = false;
             clearInterval(intervalo);
         };
-    }, [gameId, status]);
+    }, [gameId]);
 
     useEffect(() => {
         if (status !== 'FINALIZADA') return;
