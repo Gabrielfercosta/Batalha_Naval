@@ -1,189 +1,251 @@
 {
-  "annotations": { "list": [] },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
+  "id": 1,
   "links": [],
   "panels": [
     {
-      "type": "row",
-      "title": "Status Geral",
+      "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
-      "collapsed": false,
-      "panels": []
+      "id": 1,
+      "panels": [],
+      "title": "Status Geral",
+      "type": "row"
     },
     {
-      "title": "Health Status",
-      "type": "stat",
       "datasource": "Prometheus",
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
-      "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "OFFLINE", "color": "semi-dark-red" }, "1": { "text": "ONLINE", "color": "semi-dark-green" } } }], "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-red", "value": null }, { "color": "semi-dark-green", "value": 1 }] } } },
-      "options": { "colorMode": "background_solid", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
-      "targets": [{ "expr": "up{job=\"batalha-naval\"}", "legendFormat": "Backend" }]
-    },
-    {
-      "title": "Requisições Lentas (>500ms)",
-      "type": "stat",
-      "datasource": "Prometheus",
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
-      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-green", "value": null }, { "color": "#EAB839", "value": 5 }, { "color": "red", "value": 10 }] } } },
-      "options": { "colorMode": "background_solid", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
-      "targets": [{ "expr": "http_server_requests_slow_total{application=\"batalha-naval\"}", "legendFormat": "Total" }]
-    },
-    {
-      "title": "Partidas Ativas",
-      "type": "stat",
-      "datasource": "Prometheus",
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
-      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 20 }, { "color": "red", "value": 50 }] } } },
-      "options": { "colorMode": "background_solid", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
-      "targets": [{ "expr": "sum(partidas_ativas)", "legendFormat": "Total" }]
-    },
-    {
+      "fieldConfig": { "defaults": { "mappings": [], "max": 1, "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.5 }, { "color": "dark-red", "value": 0.8 }] }, "unit": "percentunit" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 1 },
+      "id": 5,
+      "options": { "minVizHeight": 75, "minVizWidth": 75, "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showThresholdLabels": false, "showThresholdMarkers": true, "sizing": "auto" },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "process_cpu_usage", "legendFormat": "__auto", "refId": "A" }],
       "title": "CPU Usage",
-      "type": "gauge",
-      "datasource": "Prometheus",
-      "gridPos": { "h": 7, "w": 6, "x": 12, "y": 1 },
-      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.5 }, { "color": "dark-red", "value": 0.8 }] } } },
-      "options": { "showThresholdMarkers": true, "reduceOptions": { "calcs": ["lastNotNull"] } },
-      "targets": [{ "expr": "process_cpu_usage", "legendFormat": "__auto" }]
+      "type": "gauge"
     },
     {
-      "title": "Partidas Criadas",
-      "type": "stat",
       "datasource": "Prometheus",
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 5 },
-      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] } } },
-      "options": { "colorMode": "value", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
-      "targets": [{ "expr": "sum(partidas_criadas_total)", "legendFormat": "Total" }]
+      "fieldConfig": { "defaults": { "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-green", "value": null }, { "color": "yellow", "value": 20 }, { "color": "red", "value": 50 }] } }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+      "id": 4,
+      "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "percentChangeColorMode": "standard", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showPercentChange": false, "textMode": "auto", "wideLayout": true },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "sum(partidas_ativas)", "legendFormat": "Total", "refId": "A" }],
+      "title": "Partidas Ativas",
+      "type": "stat"
     },
     {
-      "title": "Requisições Bloqueadas",
-      "type": "stat",
       "datasource": "Prometheus",
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 5 },
-      "fieldConfig": { "defaults": { "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 50 }, { "color": "red", "value": 200 }] } } },
-      "options": { "colorMode": "value", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
-      "targets": [{ "expr": "rate_limit_blocked_total", "legendFormat": "Bloqueadas" }]
+      "fieldConfig": { "defaults": { "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-green", "value": null }, { "color": "#EAB839", "value": 5 }, { "color": "red", "value": 10 }] } }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+      "id": 3,
+      "options": { "colorMode": "background_solid", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "percentChangeColorMode": "standard", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showPercentChange": false, "textMode": "auto", "wideLayout": true },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "http_server_requests_slow_total{application=\"batalha-naval\"}", "legendFormat": "Total", "refId": "A" }],
+      "title": "Requisições Lentas (>500ms)",
+      "type": "stat"
     },
     {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "mappings": [{ "options": { "0": { "color": "semi-dark-red", "text": "OFFLINE" }, "1": { "color": "semi-dark-green", "text": "ONLINE" } }, "type": "value" }], "thresholds": { "mode": "absolute", "steps": [{ "color": "semi-dark-red", "value": null }, { "color": "semi-dark-green", "value": 1 }] } }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
+      "id": 2,
+      "options": { "colorMode": "background_solid", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "percentChangeColorMode": "standard", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showPercentChange": false, "textMode": "auto", "wideLayout": true },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "up{job=\"batalha-naval\"}", "legendFormat": "Backend", "refId": "A" }],
+      "title": "Health Status",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "mappings": [], "max": 100, "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 50 }, { "color": "green", "value": 80 }] }, "unit": "percent" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 5 },
+      "id": 8,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "percentChangeColorMode": "standard", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showPercentChange": false, "textMode": "auto", "wideLayout": true },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "sum(cache_gets_total{result=\"hit\"}) / clamp_min(sum(cache_gets_total{result=~\"hit|miss\"}), 1) * 100", "legendFormat": "Hit Rate", "refId": "A" }],
       "title": "Cache Hit Rate (%)",
-      "type": "stat",
-      "datasource": "Prometheus",
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 5 },
-      "fieldConfig": { "defaults": { "unit": "percent", "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 50 }, { "color": "green", "value": 80 }] } } },
-      "options": { "colorMode": "value", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
-      "targets": [{ "expr": "sum(cache_gets_total{result=\"hit\"}) / clamp_min(sum(cache_gets_total{result=~\"hit|miss\"}), 1) * 100", "legendFormat": "Hit Rate" }]
+      "type": "stat"
     },
     {
-      "type": "row",
-      "title": "Performance",
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 50 }, { "color": "red", "value": 200 }] } }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 5 },
+      "id": 7,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "percentChangeColorMode": "standard", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showPercentChange": false, "textMode": "auto", "wideLayout": true },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "rate_limit_blocked_total", "legendFormat": "Bloqueadas", "refId": "A" }],
+      "title": "Requisições Bloqueadas",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "mappings": [], "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] } }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 5 },
+      "id": 6,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "percentChangeColorMode": "standard", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showPercentChange": false, "textMode": "auto", "wideLayout": true },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "sum(partidas_criadas_total)", "legendFormat": "Total", "refId": "A" }],
+      "title": "Partidas Criadas",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
-      "collapsed": false,
-      "panels": []
+      "id": 9,
+      "panels": [],
+      "title": "Performance",
+      "type": "row"
     },
     {
-      "title": "Threads Ativas",
-      "type": "timeseries",
       "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "color": { "fixedColor": "dark-blue", "mode": "fixed" }, "custom": { "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "barWidthFactor": 0.6, "drawStyle": "line", "fillOpacity": 15, "gradientMode": "opacity", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "insertNulls": false, "lineInterpolation": "stepAfter", "lineWidth": 2, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "decimals": 0, "mappings": [], "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 80 }] } }, "overrides": [] },
       "gridPos": { "h": 6, "w": 12, "x": 0, "y": 10 },
-      "fieldConfig": { "defaults": { "color": { "fixedColor": "dark-blue", "mode": "fixed" }, "custom": { "drawStyle": "line", "lineInterpolation": "stepAfter", "lineWidth": 2, "fillOpacity": 15, "gradientMode": "opacity", "showPoints": "never" }, "decimals": 0, "min": 0 } },
-      "targets": [{ "expr": "jvm_threads_live_threads{application=\"batalha-naval\"}", "legendFormat": "Live Threads" }]
+      "id": 10,
+      "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "single", "sort": "none" } },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "jvm_threads_live_threads{application=\"batalha-naval\"}", "legendFormat": "Live Threads", "refId": "A" }],
+      "title": "Threads Ativas",
+      "type": "timeseries"
     },
     {
-      "title": "Uso de CPU",
-      "type": "timeseries",
       "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "custom": { "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "barWidthFactor": 0.6, "drawStyle": "line", "fillOpacity": 20, "gradientMode": "scheme", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "insertNulls": false, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "auto", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "max": 1, "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "#EAB839", "value": 0.5 }, { "color": "red", "value": 0.8 }] }, "unit": "percentunit" }, "overrides": [] },
       "gridPos": { "h": 6, "w": 12, "x": 12, "y": 10 },
-      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "custom": { "drawStyle": "line", "lineInterpolation": "smooth", "lineWidth": 2, "fillOpacity": 20, "gradientMode": "scheme", "showPoints": "auto" }, "unit": "percentunit", "min": 0, "max": 1, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "#EAB839", "value": 0.5 }, { "color": "red", "value": 0.8 }] } } },
-      "targets": [{ "expr": "process_cpu_usage", "legendFormat": "CPU" }]
+      "id": 11,
+      "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "single", "sort": "none" } },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "process_cpu_usage", "legendFormat": "CPU", "refId": "A" }],
+      "title": "Uso de CPU",
+      "type": "timeseries"
     },
     {
-      "title": "Requisições por Segundo",
-      "type": "timeseries",
       "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "color": { "mode": "continuous-GrYlRd" }, "custom": { "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "barWidthFactor": 0.6, "drawStyle": "line", "fillOpacity": 0, "gradientMode": "scheme", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "insertNulls": false, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "decimals": 1, "mappings": [], "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 80 }] }, "unit": "reqps" }, "overrides": [] },
       "gridPos": { "h": 7, "w": 12, "x": 0, "y": 16 },
-      "fieldConfig": { "defaults": { "color": { "mode": "continuous-GrYlRd" }, "custom": { "drawStyle": "line", "lineInterpolation": "smooth", "lineWidth": 2, "fillOpacity": 0, "gradientMode": "scheme", "showPoints": "never" }, "unit": "reqps", "min": 0, "decimals": 1 } },
-      "options": { "legend": { "calcs": ["last", "max"], "displayMode": "table", "placement": "bottom" } },
-      "targets": [{ "expr": "sum by (uri) (rate(http_server_requests_seconds_count{application=\"batalha-naval\", uri=~\"/api/game.*|/api/auth.*|/api/quiz.*\"}[1m]))", "legendFormat": "{{uri}}" }]
+      "id": 12,
+      "options": { "legend": { "calcs": ["last", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "single", "sort": "none" } },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "sum by (uri) (rate(http_server_requests_seconds_count{application=\"batalha-naval\", uri=~\"/api/game.*|/api/auth.*|/api/quiz.*\"}[1m]))", "legendFormat": "{{uri}}", "refId": "A" }],
+      "title": "Requisições por Segundo",
+      "type": "timeseries"
     },
     {
-      "title": "Requisições Bloqueadas (Rate Limit)/min",
-      "type": "timeseries",
       "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "color": { "fixedColor": "orange", "mode": "fixed" }, "custom": { "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "barWidthFactor": 0.6, "drawStyle": "line", "fillOpacity": 20, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "insertNulls": false, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 80 }] } }, "overrides": [] },
       "gridPos": { "h": 7, "w": 12, "x": 12, "y": 16 },
-      "fieldConfig": { "defaults": { "color": { "fixedColor": "orange", "mode": "fixed" }, "custom": { "drawStyle": "line", "lineInterpolation": "smooth", "lineWidth": 2, "fillOpacity": 20, "showPoints": "never" }, "min": 0 } },
-      "targets": [{ "expr": "sum(rate(http_server_requests_seconds_count{status=\"429\", application=\"batalha-naval\"}[1m])) * 60", "legendFormat": "429/min" }]
+      "id": 13,
+      "options": { "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "single", "sort": "none" } },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "sum(rate(http_server_requests_seconds_count{status=\"429\", application=\"batalha-naval\"}[1m])) * 60", "legendFormat": "429/min", "refId": "A" }],
+      "title": "Requisições Bloqueadas (Rate Limit)/min",
+      "type": "timeseries"
     },
     {
-      "type": "row",
-      "title": "Aplicação",
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
       "collapsed": false,
-      "panels": []
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "id": 14,
+      "panels": [],
+      "title": "Aplicação",
+      "type": "row"
     },
     {
-      "title": "Partidas Ativas por Modo",
-      "type": "timeseries",
       "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "barWidthFactor": 0.6, "drawStyle": "bars", "fillOpacity": 60, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "insertNulls": false, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "normal" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 80 }] } }, "overrides": [] },
       "gridPos": { "h": 7, "w": 12, "x": 0, "y": 24 },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "bars", "lineWidth": 1, "fillOpacity": 60, "gradientMode": "none", "showPoints": "never", "stacking": { "mode": "normal" } }, "min": 0 } },
-      "options": { "legend": { "calcs": ["last"], "displayMode": "table", "placement": "bottom" } },
-      "targets": [{ "expr": "partidas_ativas", "legendFormat": "{{modo}}" }]
+      "id": 15,
+      "options": { "legend": { "calcs": ["last"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "single", "sort": "none" } },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "partidas_ativas", "legendFormat": "{{modo}}", "refId": "A" }],
+      "title": "Partidas Ativas por Modo",
+      "type": "timeseries"
     },
     {
-      "title": "JVM Heap Used",
-      "type": "timeseries",
       "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "barWidthFactor": 0.6, "drawStyle": "line", "fillOpacity": 30, "gradientMode": "opacity", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "insertNulls": false, "lineInterpolation": "smooth", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "normal" }, "thresholdsStyle": { "mode": "off" } }, "mappings": [], "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 80 }] }, "unit": "decbytes" }, "overrides": [] },
       "gridPos": { "h": 7, "w": 12, "x": 12, "y": 24 },
-      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineInterpolation": "smooth", "lineWidth": 1, "fillOpacity": 30, "gradientMode": "opacity", "showPoints": "never", "stacking": { "mode": "normal" } }, "unit": "decbytes", "min": 0 } },
-      "options": { "legend": { "calcs": ["last", "max"], "displayMode": "table", "placement": "bottom" } },
-      "targets": [{ "expr": "jvm_memory_used_bytes{area=\"heap\", application=\"batalha-naval\"}", "legendFormat": "{{id}}" }]
+      "id": 16,
+      "options": { "legend": { "calcs": ["last", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "single", "sort": "none" } },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "jvm_memory_used_bytes{area=\"heap\", application=\"batalha-naval\"}", "legendFormat": "{{id}}", "refId": "A" }],
+      "title": "JVM Heap Used",
+      "type": "timeseries"
     },
     {
-      "title": "Tiros - Clássico",
-      "type": "piechart",
       "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } }, "mappings": [] }, "overrides": [] },
       "gridPos": { "h": 7, "w": 6, "x": 0, "y": 31 },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom" }, "pieType": "donut" },
-      "targets": [{ "expr": "gameplay_tiros_total{modo=\"classico\"}", "legendFormat": "{{resultado}}" }]
+      "id": 17,
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true }, "pieType": "donut", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "tooltip": { "mode": "single", "sort": "none" } },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "gameplay_tiros_total{modo=\"classico\"}", "legendFormat": "{{resultado}}", "refId": "A" }],
+      "title": "Tiros - Clássico",
+      "type": "piechart"
     },
     {
-      "title": "Tiros - Minado",
-      "type": "piechart",
       "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } }, "mappings": [] }, "overrides": [] },
       "gridPos": { "h": 7, "w": 6, "x": 6, "y": 31 },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom" }, "pieType": "donut" },
-      "targets": [{ "expr": "gameplay_tiros_total{modo=\"minado\"}", "legendFormat": "{{resultado}}" }]
+      "id": 18,
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true }, "pieType": "donut", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "tooltip": { "mode": "single", "sort": "none" } },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "gameplay_tiros_total{modo=\"minado\"}", "legendFormat": "{{resultado}}", "refId": "A" }],
+      "title": "Tiros - Minado",
+      "type": "piechart"
     },
     {
-      "title": "Quiz - Respostas",
-      "type": "piechart",
       "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } }, "mappings": [] }, "overrides": [] },
       "gridPos": { "h": 7, "w": 6, "x": 12, "y": 31 },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom" }, "pieType": "donut" },
-      "targets": [{ "expr": "gameplay_quiz_respostas_total", "legendFormat": "{{resultado}}" }]
+      "id": 19,
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "showLegend": true }, "pieType": "donut", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "tooltip": { "mode": "single", "sort": "none" } },
+      "pluginVersion": "11.4.0",
+      "targets": [{ "expr": "gameplay_quiz_respostas_total", "legendFormat": "{{resultado}}", "refId": "A" }],
+      "title": "Quiz - Respostas",
+      "type": "piechart"
     },
     {
-      "title": "Quiz - Acertos por Dificuldade (%)",
-      "type": "bargauge",
       "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "mappings": [], "max": 100, "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 40 }, { "color": "green", "value": 70 }] }, "unit": "percent" }, "overrides": [] },
       "gridPos": { "h": 7, "w": 6, "x": 18, "y": 31 },
-      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 40 }, { "color": "green", "value": 70 }] } } },
-      "options": { "orientation": "horizontal", "displayMode": "gradient", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "id": 20,
+      "options": { "displayMode": "gradient", "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false }, "maxVizHeight": 300, "minVizHeight": 16, "minVizWidth": 8, "namePlacement": "auto", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "showUnfilled": true, "sizing": "auto", "valueMode": "color" },
+      "pluginVersion": "11.4.0",
       "targets": [
         { "expr": "sum(gameplay_quiz_por_dificuldade_total{dificuldade=\"easy\",resultado=\"correta\"}) / clamp_min(sum(gameplay_quiz_por_dificuldade_total{dificuldade=\"easy\"}), 1) * 100", "legendFormat": "Fácil", "refId": "A" },
         { "expr": "sum(gameplay_quiz_por_dificuldade_total{dificuldade=\"medium\",resultado=\"correta\"}) / clamp_min(sum(gameplay_quiz_por_dificuldade_total{dificuldade=\"medium\"}), 1) * 100", "legendFormat": "Média", "refId": "B" },
         { "expr": "sum(gameplay_quiz_por_dificuldade_total{dificuldade=\"hard\",resultado=\"correta\"}) / clamp_min(sum(gameplay_quiz_por_dificuldade_total{dificuldade=\"hard\"}), 1) * 100", "legendFormat": "Difícil", "refId": "C" }
-      ]
+      ],
+      "title": "Quiz - Acertos por Dificuldade (%)",
+      "type": "bargauge"
     }
   ],
-  "schemaVersion": 39,
+  "preload": false,
+  "schemaVersion": 40,
   "tags": ["batalha-naval"],
   "templating": { "list": [] },
   "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
   "title": "Batalha Naval - Observabilidade",
   "uid": "batalha-naval-dash",
-  "version": 5
+  "version": 2,
+  "weekStart": ""
 }

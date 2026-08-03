@@ -292,3 +292,82 @@ kind create cluster --name batalha-naval --config /mnt/c/Users/gcosta/Downloads/
 # ... aplicar manifests (ver README-PARTE2.md)
 sh /mnt/c/Users/gcosta/Downloads/Batalha_Naval/k8s/verificar-sticky.sh
 ```
+
+
+---
+
+## 10. Bugs Identificados e Corrigidos
+
+Durante a implementação das melhorias de observabilidade e resiliência, alguns bugs foram introduzidos e detectados através das próprias ferramentas de monitoramento e testes. Abaixo estão documentados com causa raiz e correção.
+
+### Bug 1: Loop infinito de login em produção
+
+**Sintoma:** Login com sucesso → redirecionado de volta pro login → loop infinito.
+
+**Causa:** O `spring-boot-starter-data-redis` fez o backend exigir Redis. O Render não tem Redis, então o health ficava DOWN e a primeira chamada autenticada falhava. O frontend limpava o token e voltava pro login.
+
+**Correção:** Cache condicional — com Redis quando disponível, Caffeine (memória) com TTL quando não. Health check do Redis desabilitado por padrão.
+
+**Detectado por:** Health check retornando 503 (`redis: DOWN`) no endpoint `/actuator/health`.
+
+---
+
+### Bug 2: Sala criada não aparecia para o outro jogador
+
+**Sintoma:** Jogador A criava uma sala. Jogador B não via a sala na listagem.
+
+**Causa:** Cache em memória sem TTL (entradas nunca expiravam) + `@CacheEvict` ignorado no quiz por self-invocation (chamada interna não passa pelo proxy do Spring).
+
+**Correção:** Caffeine com `expireAfterWrite(5s)` + `@CacheEvict` direto no `criarPartidaQuiz`.
+
+**Detectado por:** Teste de integração `CacheSalasIntegrationTest` — sem a correção: `expected: <true> but was: <false>`.
+
+---
+
+### Bug 3: "Esperando o outro jogador" infinitamente
+
+**Sintoma:** Ambos os jogadores ficavam presos esperando, mesmo após ambos terem marcado pronto.
+
+**Causa:** Rate limiting de 100 req/min por IP para todas as rotas. Duas abas no mesmo PC (mesmo IP) fazendo polling do lobby = 72 req/min. Somando ações do jogo, passava de 100 e o `GET /api/game/{id}` recebia 429. O frontend não tratava o erro e o turno nunca era definido.
+
+**Correção:** Limites separados por tipo de rota (auth: 20, escrita: 60, leitura: 600) + retry com polling de segurança no frontend.
+
+**Detectado por:** Teste `RateLimitFilterTest` — com limite antigo: `buscar a partida foi bloqueado ==> expected: not equal but was: <429>`.
+
+---
+
+### Bug 4: "Esta posição já foi atacada" no primeiro tiro (Quiz)
+
+**Sintoma:** Primeiro tiro em qualquer posição no modo quiz dava erro.
+
+**Causa:** Linha `resultado = partida.atirar(jogador, tiro)` duplicada por copy-paste ao adicionar métrica de gameplay.
+
+**Correção:** Remoção da linha duplicada.
+
+**Detectado por:** Teste manual durante validação do jogo.
+
+---
+
+### Bug 5: Estado da batalha resetando durante o jogo
+
+**Sintoma:** Tiros apareciam e sumiam, turno resetava aleatoriamente.
+
+**Causa:** useEffect com dependência `[gameId, status]` recriava polling e sobrescrevia estado a cada mudança de status.
+
+**Correção:** Dependência apenas em `[gameId]`, polling para sozinho com `clearInterval` ao detectar partida em andamento.
+
+**Detectado por:** Teste manual — comportamento instável na tela de batalha.
+
+---
+
+### Resumo
+
+| Bug | Detectado por | Impacto | Teste de regressão |
+|-----|--------------|---------|-------------------|
+| Loop de login | `/actuator/health` → 503 | Site inacessível | Health check manual |
+| Sala invisível | Teste integração cache | Jogadores não se encontram | `CacheSalasIntegrationTest` |
+| Espera infinita | `RateLimitFilterTest` | Partida não inicia | 8 testes unitários |
+| Posição já atacada | Teste manual | Quiz injogável | Correção trivial (1 linha) |
+| Estado instável | Teste manual | Jogo imprevisível | Correção no useEffect |
+
+Todos os bugs foram introduzidos durante a implementação das melhorias e detectados antes do deploy final. Testes de regressão foram adicionados para garantir que não retornem.

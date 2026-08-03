@@ -97,6 +97,11 @@
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>
+		<!-- Push de métricas para Grafana Cloud via OTLP -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-otlp</artifactId>
+		</dependency>
 
 		<!-- Observabilidade: Tracing com OpenTelemetry -->
 		<dependency>
