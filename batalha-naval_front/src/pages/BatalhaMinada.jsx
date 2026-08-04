@@ -5,7 +5,6 @@ import { tocarMusica, tocarSom } from '../audio/musica';
 import { estiloNavio as estiloNavioBase } from '../utils/navios';
 
 const GRID = 16;
-const ESPESSURA = 1.3;
 
 const SPRITES = {
     5: '/navios/carrier.png',

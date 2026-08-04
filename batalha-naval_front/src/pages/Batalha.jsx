@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { conectar, atirar } from '../ws/socket';
 import { buscarPartida, sincronizarPartida } from '../api/api';
 import { tocarMusica, tocarSom } from '../audio/musica';
-import { estiloNavio as estiloNavioBase, ESPESSURA } from '../utils/navios';
+import { estiloNavio as estiloNavioBase } from '../utils/navios';
 
 const SPRITES = {
     PORTA_AVIOES: '/navios/carrier.png',

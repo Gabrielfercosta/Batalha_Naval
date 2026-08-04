@@ -102,9 +102,14 @@ public abstract class ServicoPartidaBase<T extends PartidaBase> {
     @Scheduled(fixedRate = 60000)
     public void limparSalasAbandonadas() {
         long agora = System.currentTimeMillis();
-        long limite = 5 * 60 * 1000;
-        partidas.entrySet().removeIf(e ->
-                e.getValue().getStatus() == StatusPartida.AGUARDANDO
-                        && agora - e.getValue().getCriadaEm() > limite);
+        long limiteAguardando = 5 * 60 * 1000;
+        long limiteFinalizadas = 10 * 60 * 1000;
+        partidas.entrySet().removeIf(e -> {
+            StatusPartida status = e.getValue().getStatus();
+            long idade = agora - e.getValue().getCriadaEm();
+            if (status == StatusPartida.AGUARDANDO && idade > limiteAguardando) return true;
+            if (status == StatusPartida.FINALIZADA && idade > limiteFinalizadas) return true;
+            return false;
+        });
     }
 }
